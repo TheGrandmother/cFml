@@ -1,13 +1,17 @@
 /**
  *  Contains global typedefs
  *  
- *  Kinds silly
+ *  Kinda silly
  **/
+#include <stdint.h>
+#include <stdlib.h>
 
 
 #ifndef _TYPES_H
 #define _TYPES_H
-  typedef uint64_t fml_word_t;
-  typedef int64_t fml_int_t;
-  typedef uint64_t fml_addr_t;
+  typedef uint64_t fml_word;
+  typedef int64_t fml_int;
+  typedef uint64_t fml_addr;
+
+  typedef unsigned int fml_flag;
 #endif
