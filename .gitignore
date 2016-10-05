@@ -1,0 +1,6 @@
+#c files
+*.o
+
+#vim files
+*.swp
+*.swo
