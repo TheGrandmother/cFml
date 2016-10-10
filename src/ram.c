@@ -11,15 +11,24 @@
 #include "hardware_page.h"
 #include "video_page.h"
 #include "irq_page.h"
+#include "e4c/e4c_lite.h"
+
+E4C_DEFINE_EXCEPTION(RamException, "Stack Exception.", RuntimeException);
+E4C_DEFINE_EXCEPTION(BadAddressException, "Stack empty.", RamException);
+E4C_DEFINE_EXCEPTION(SpecialPageException, "Exception in special page",RamException);
+E4C_DEFINE_EXCEPTION(VideoPageException, "Exception in videopage", SpecialPageException);
+E4C_DEFINE_EXCEPTION(HardwarePageException, "Exception in hardware page.", SpecialPageException);
+E4C_DEFINE_EXCEPTION(IrqPageException, "Exception in IRQ page.", SpecialPageException);
 
 fml_ram *newRam(size_t size){
   fml_ram *ram = malloc(sizeof(fml_ram));
-  ram->ram_size = size;
+  ram->ram_size = (fml_addr)size;
   ram->ram = calloc(size,sizeof(fml_word));
   //TODO: Implement pages
   ram->video_page = NULL;
   ram->irq_page = NULL;
   ram->hardware_page = NULL;
+  return ram;
 }
 
 void destroyRam(fml_ram *ram){
@@ -31,41 +40,48 @@ void destroyRam(fml_ram *ram){
 
 fml_word read(fml_ram *ram, fml_addr addr){
   if((addr & PAGE_MASK) == 0){
+    if(addr >= ram->ram_size){
+      E4C_THROW(BadAddressException,"Address beyond memmory bounds.");
+    }
     return ram->ram[addr];
   }else{
     switch (addr & PAGE_MASK){
       case VIDEO_PAGE_VALUE:
-        crashAndBurn("Video page not implemented for reading.");
+        E4C_THROW(VideoPageException, "Video page not implemented");
         break;
       case HARDWARE_PAGE_VALUE:
-        crashAndBurn("Hardware page not implemented for reading.");
+        E4C_THROW(HardwarePageException, "Hardware page not implemented");
         break;
       case IRQ_PAGE_VALUE:
-        crashAndBurn("IRQ page not implemented for reading.");
+        E4C_THROW(IrqPageException, "IRQ page not implemented");
         break;
       default:
-        crashAndBurn("Invalid memory page for reading.");
+        E4C_THROW(SpecialPageException,"Invalid Special Page");
         break;
     }
+    return 0; //Silence warnings
   }
 }
 
 void write(fml_ram *ram, fml_addr addr, fml_word data){
   if((addr & PAGE_MASK) == 0){
+    if(addr >= ram->ram_size){
+      E4C_THROW(BadAddressException,"Address beyond memmory bounds.");
+    }
     ram->ram[addr] = data;
   }else{
     switch (addr & PAGE_MASK){
       case VIDEO_PAGE_VALUE:
-        crashAndBurn("Video page not implemented for writing.");
+        E4C_THROW(VideoPageException, "Video page not implemented");
         break;
       case HARDWARE_PAGE_VALUE:
-        crashAndBurn("Hardware page not implemented for writing.");
+        E4C_THROW(HardwarePageException, "Hardware page not implemented");
         break;
       case IRQ_PAGE_VALUE:
-        crashAndBurn("IRQ page not implemented for writing.");
+        E4C_THROW(IrqPageException, "IRQ page not implemented");
         break;
       default:
-        crashAndBurn("Invalid memory page for writing.");
+        E4C_THROW(SpecialPageException,"Invalid Special Page");
         break;
     }
   }
