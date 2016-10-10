@@ -1,4 +1,4 @@
-
+#include "e4c/e4c_lite.h"
 #ifndef _FAIL_H
 #define _FAIL_H
 

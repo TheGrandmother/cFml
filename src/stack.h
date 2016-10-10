@@ -1,8 +1,15 @@
 #include "components.h"
 #include "fail.h"
+#include "e4c/e4c_lite.h"
 
 #ifndef _STACK_H
 #define _STACK_H
+E4C_DECLARE_EXCEPTION(StackException);
+E4C_DECLARE_EXCEPTION(StackEmptyException);
+E4C_DECLARE_EXCEPTION(StackOverflowException);
+
+
+void print_stack(fml_stack *stack);
 
 /** Allocates and intializes a new stack.
  *
