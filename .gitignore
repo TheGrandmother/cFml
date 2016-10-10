@@ -1,5 +1,7 @@
 #c files
 *.o
+*.gch
+bin/
 
 #vim files
 *.swp
