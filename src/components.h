@@ -12,7 +12,7 @@
 #include "irq_page.h"
 
 #ifndef _COMPONENTS_H
-#define _CONPONENTS_H
+#define _COMPONENTS_H
 
 typedef struct{
   fml_word* array;
@@ -22,7 +22,7 @@ typedef struct{
 
 typedef struct{
   fml_word* ram;
-  size_t ram_size;
+  fml_addr ram_size;
   fml_video_page* video_page;
   fml_irq_page* irq_page;
   fml_hardware_page* hardware_page;
