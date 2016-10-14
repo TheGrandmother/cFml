@@ -1,7 +1,20 @@
 {
-  "Instruction_layout" : {
-    "a0" : [0, 3],
-    "a1" : [4,7],
-    "step_length" : [8,9]
+  "instruction_layout" : {
+    "a0" : [1, 4],
+    "a1" : [5,8],
+    "step_length" : [9,11],
+    "opcode_start": 12
+  },
+
+  "argument_structure" :{
+    "location_bits" : [1,2],
+    "location_values" : {
+      "reg_x" : 0,
+      "reg_y" : 1,
+      "acc_stack" : 2,
+      "cosntant" : 3
+    },
+    "address_bit" : [3,3],
+    "sp_bit" : [4,4]
   }
 }
