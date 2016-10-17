@@ -1,4 +1,5 @@
 import json as js
+import sys
 
 def makeCDefine(name,value):
     return "#define " + name + "\t" + value + "\n"
@@ -124,11 +125,12 @@ class OperationsLayout():
         header_text += self.makeValueDefines()
         header_text += "\n#endif"
 
+        return header_text
+
+    def writeHeaderFile(self):
         header_file = open("operation_constants.h",'w')
-        header_file.write(header_text)
+        header_file.write(makeHeaderFile)
         header_file.close()
-
-
 
 class InstructionLayout():
     shift_lengths ={}
@@ -205,13 +207,44 @@ class InstructionLayout():
         argument_constants += "\n\n"
 
         header_text =  top_level_comment + include_guard + isa_comment + isa_constants + argument_constants + "#endif"
+        return header_text
+
+    def writeHeaderFile(self):
         header_file = open("isa_constants.h",'w')
-        header_file.write(header_text)
+        header_file.write(makeHeaderFile())
         header_file.close()
 
 if __name__ == "__main__":
-    print "Starting to generate constants"
-    instruction_layout = InstructionLayout("ISA.json")
-    operations = OperationsLayout(instruction_layout, "instructions.json")
-    operations.makeHeaderFile()
-    instruction_layout.makeHeaderFile()
+    print_files = False
+    write_files = True
+    instructions = None
+    operations = None
+    for arg in sys.argv:
+        if arg == "-i":
+            instructions = InstructionLayout("ISA.json")
+            continue
+        elif arg == "-o":
+            operations = OperationsLayout(instruction_layout, "instructions.json")
+            continue
+        elif arg == "-p":
+            print_files = True
+            continue
+        elif arg == "-w":
+            write_files = True
+            continue
+        else:
+            print "Invalid argument: " + arg
+            exit(1)
+
+    if operations != None:
+        if print_files:
+            print operations.makeHeaderFile()
+        if write_files:
+            operations.writeHeaderFile()
+
+    if instructions != None:
+        if print_files:
+            print instructions.makeHeaderFile()
+        if write_files:
+            instructions.writeHeaderFile()
+
