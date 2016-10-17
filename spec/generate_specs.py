@@ -41,6 +41,7 @@ class OperationsLayout():
     binary_start = 0
     unary_start = 0
     control_start = 0
+    operations_end = 0
     basic_ops   = None
     binary_ops  = None
     unary_ops   = None
@@ -88,6 +89,7 @@ class OperationsLayout():
         for elem in self.control_ops:
             self.values.update({self.control_ops[elem]["mnemonic"] : index})
             index = index +1
+        self.operations_end = index;
 
     def makeValueDefines(self):
         c_defines = ""
@@ -103,9 +105,10 @@ class OperationsLayout():
     
     def makeHintDefines(self):
         c_defines = ""
-        c_defines += makeCDefine("BINARY_START",uhex(self.binary_start << self.isa_object.shift_lengths["opcode_shift"]))
-        c_defines += makeCDefine("UNARY_START",uhex(self.unary_start << self.isa_object.shift_lengths["opcode_shift"]))
-        c_defines += makeCDefine("CONTROL_START",uhex(self.control_start << self.isa_object.shift_lengths["opcode_shift"]))
+        c_defines += makeCDefine("BINARY_START",uhex(self.binary_start))
+        c_defines += makeCDefine("UNARY_START",uhex(self.unary_start))
+        c_defines += makeCDefine("CONTROL_START",uhex(self.control_start))
+        c_defines += makeCDefine("OPERATIONS_END",uhex(self.operations_end))
         return c_defines
 
     def makeHeaderFile(self):
@@ -115,6 +118,7 @@ class OperationsLayout():
         header_text += "* \n * The file was auto generated. DO NOT EDIT!\n**/\n\n"
         header_text += "#ifndef _OPERATION_CONSTANTS_H\n"
         header_text += "#define _OPERATION_CONSTANTS_H\n\n"
+        header_text += "#define NOP\t0\n\n"
         header_text += "//These are instruction hints\n"
         header_text += "//Used to for performance\n"
         header_text += self.makeHintDefines()
@@ -194,6 +198,8 @@ class InstructionLayout():
 
         for key, value in self.shift_lengths.iteritems():
             isa_constants += "#define " + key.upper()  + " \t" + (uhex(value)) + "\n"
+        isa_constants += makeCDefine("a0_offs".upper(),uhex(1));
+        isa_constants += makeCDefine("a1_offs".upper(),uhex(2));
         isa_constants += "\n\n"
 
         argument_constants = "//These constants define the strucuture of the argument\n"

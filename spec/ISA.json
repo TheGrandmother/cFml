@@ -12,7 +12,7 @@
       "reg_x" : 0,
       "reg_y" : 1,
       "acc_stack" : 2,
-      "cosntant" : 3
+      "constant" : 3
     },
     "address_bit" : [3,3],
     "sp_bit" : [4,4]
