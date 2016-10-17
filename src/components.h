@@ -22,6 +22,8 @@ typedef struct{
 
 typedef struct{
   fml_word* ram;
+  fml_word* instruction_ram;
+  fml_addr instruction_ram_size;
   fml_addr ram_size;
   fml_video_page* video_page;
   fml_irq_page* irq_page;

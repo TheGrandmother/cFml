@@ -20,10 +20,12 @@ E4C_DEFINE_EXCEPTION(VideoPageException, "Exception in videopage", SpecialPageEx
 E4C_DEFINE_EXCEPTION(HardwarePageException, "Exception in hardware page.", SpecialPageException);
 E4C_DEFINE_EXCEPTION(IrqPageException, "Exception in IRQ page.", SpecialPageException);
 
-fml_ram *newRam(size_t size){
+fml_ram *newRam(size_t size, size_t instruction_size){
   fml_ram *ram = malloc(sizeof(fml_ram));
   ram->ram_size = (fml_addr)size;
+  ram->instruction_ram_size = (fml_addr)instruction_size;
   ram->ram = calloc(size,sizeof(fml_word));
+  ram->instruction_ram = calloc(instruction_size,sizeof(fml_word));
   //TODO: Implement pages
   ram->video_page = NULL;
   ram->irq_page = NULL;
@@ -33,6 +35,7 @@ fml_ram *newRam(size_t size){
 
 void destroyRam(fml_ram *ram){
   free(ram->ram);
+  free(ram->instruction_ram);
   //TODO: Implement freeing of pages
   free(ram);
 }
