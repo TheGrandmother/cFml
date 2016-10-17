@@ -22,8 +22,8 @@ typedef struct{
 
 typedef struct{
   fml_word* ram;
-  fml_word* instruction_ram;
-  fml_addr instruction_ram_size;
+  fml_word* prg_ram;
+  fml_addr prg_size;
   fml_addr ram_size;
   fml_video_page* video_page;
   fml_irq_page* irq_page;
@@ -32,18 +32,19 @@ typedef struct{
 
 
 typedef struct{
-  fml_word x_reg;
-  fml_word y_reg;
+  fml_word x;
+  fml_word y;
 
-  fml_addr frame_pointer;
-  fml_addr program_counter;
+  fml_addr fp;
+  fml_addr pc;
 
-  fml_stack acumulator_stack;
-  fml_stack jump_stack;
+  fml_stack *s;
+  fml_stack *js;
 
   fml_flag halt; 
   fml_flag irq_interupt;
 
+  fml_ram *ram;
 }fml_machine;
 
 #endif
