@@ -35,7 +35,7 @@ typedef struct{
   fml_word x;
   fml_word y;
 
-  fml_addr fp;
+  fml_addr sp;
   fml_addr pc;
 
   fml_stack *s;
