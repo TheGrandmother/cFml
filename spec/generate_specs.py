@@ -114,7 +114,7 @@ class OperationsLayout():
         header_text += "* This file contains the constats for all the instructions\n"
         header_text += "* \n * The file was auto generated. DO NOT EDIT!\n\n"
         header_text += "#ifndef _OPERATION_CONSTANTS_H\n"
-        header_text += "#define _OPERATION_CONSTANTS_H\n"
+        header_text += "#define _OPERATION_CONSTANTS_H\n\n"
         header_text += "//These are instruction hints\n"
         header_text += "//Used to for performance\n"
         header_text += self.makeHintDefines()
@@ -123,13 +123,13 @@ class OperationsLayout():
         header_text += self.makeArgumentCountDefines()
         header_text += "\n//These are the numeric values of the operations\n"
         header_text += self.makeValueDefines()
-        header_text += "\n#endif"
+        header_text += "\n#endif\n"
 
         return header_text
 
     def writeHeaderFile(self):
         header_file = open("operation_constants.h",'w')
-        header_file.write(makeHeaderFile)
+        header_file.write(self.makeHeaderFile())
         header_file.close()
 
 class InstructionLayout():
@@ -206,12 +206,12 @@ class InstructionLayout():
 
         argument_constants += "\n\n"
 
-        header_text =  top_level_comment + include_guard + isa_comment + isa_constants + argument_constants + "#endif"
+        header_text =  top_level_comment + include_guard + isa_comment + isa_constants + argument_constants + "#endif\n"
         return header_text
 
     def writeHeaderFile(self):
         header_file = open("isa_constants.h",'w')
-        header_file.write(makeHeaderFile())
+        header_file.write(self.makeHeaderFile())
         header_file.close()
 
 if __name__ == "__main__":
@@ -224,7 +224,8 @@ if __name__ == "__main__":
             instructions = InstructionLayout("ISA.json")
             continue
         elif arg == "-o":
-            operations = OperationsLayout(instruction_layout, "instructions.json")
+            instructions = InstructionLayout("ISA.json")
+            operations = OperationsLayout(instructions, "instructions.json")
             continue
         elif arg == "-p":
             print_files = True
@@ -232,6 +233,8 @@ if __name__ == "__main__":
         elif arg == "-w":
             write_files = True
             continue
+        elif arg == sys.argv[0]:
+            continue #this is just the file name
         else:
             print "Invalid argument: " + arg
             exit(1)
