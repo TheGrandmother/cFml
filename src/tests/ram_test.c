@@ -12,13 +12,13 @@
 #include "../components.h"
 
 void create_and_destroy(){
-  fml_ram *ram = create_ram(10);
+  fml_ram *ram = create_ram(10,10);
   destroy_ram(ram);
 }
 
 void write_and_read(){
   size_t size = 100;
-  fml_ram *ram = create_ram(size);
+  fml_ram *ram = create_ram(size, 10);
 
   srand(time(NULL));
   for(int i = 0; i < 10000; i++){
@@ -38,7 +38,7 @@ void write_and_read(){
 
 void test_invalid_addr(){
   size_t size = 10;
-  fml_ram *ram = create_ram(size);
+  fml_ram *ram = create_ram(size, 10);
 
 
   bool thrown = false;
@@ -60,7 +60,7 @@ void test_invalid_addr(){
 
 void test_invalid_page(){
   size_t size = 10;
-  fml_ram *ram = create_ram(size);
+  fml_ram *ram = create_ram(size, 10);
 
   bool thrown =false;
   E4C_TRY{

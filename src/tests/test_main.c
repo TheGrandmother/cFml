@@ -3,12 +3,12 @@
 #include <CUnit/Basic.h>
 #include "stack_test.h"
 #include "ram_test.h"
+#include "eval_test.h"
 
 int init_suite(void) { return 0; }
 int clean_suite(void) { return 0; }
 
 int main(){
-   CU_pSuite pSuite = NULL;
 
    /* initialize the CUnit test registry */
    if ( CUE_SUCCESS != CU_initialize_registry() )
@@ -30,9 +30,16 @@ int main(){
      CU_TEST_INFO_NULL,
    };
 
+   CU_TestInfo eval_tests[] = {
+     {"Testing build and destroy.", machine_create_and_destroy},
+     {"Testing Inc", test_inc},
+     CU_TEST_INFO_NULL,
+   };
+
    CU_SuiteInfo suites[] = {
-     { "Testing Stack", init_suite, clean_suite, stack_tests },
-     { "Testing Ram", init_suite, clean_suite, ram_tests },
+     { "Testing Stack", init_suite, clean_suite, stack_tests},
+     { "Testing Ram", init_suite, clean_suite, ram_tests},
+     { "Testing Eval", init_suite, clean_suite, eval_tests},
      CU_SUITE_INFO_NULL,
    };
 
@@ -46,6 +53,7 @@ int main(){
 
    CU_basic_show_failures(CU_get_failure_list());
    CU_cleanup_registry();
+   printf("\n");
 
    return CU_get_error();
 }
