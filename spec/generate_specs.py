@@ -112,7 +112,7 @@ class OperationsLayout():
         header_text = "";
         header_text += "/**\n"
         header_text += "* This file contains the constats for all the instructions\n"
-        header_text += "* \n * The file was auto generated. DO NOT EDIT!\n\n"
+        header_text += "* \n * The file was auto generated. DO NOT EDIT!\n**/\n\n"
         header_text += "#ifndef _OPERATION_CONSTANTS_H\n"
         header_text += "#define _OPERATION_CONSTANTS_H\n\n"
         header_text += "//These are instruction hints\n"

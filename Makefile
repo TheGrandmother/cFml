@@ -6,7 +6,7 @@ bin/test:
 	make -C src test
 	./bin/test
 
-constants: src/constants/operation_constants.h src/constants/isa_constants.h
+constants: src/constants/operation_constants.h src/constants/isa_constants.h spec/generate_specs.py
 
 src/constants/operation_constants.h: spec/instructions.json spec/generate_specs.py
 	cd spec/; python generate_specs.py -o -w
