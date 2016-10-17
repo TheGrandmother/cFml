@@ -1,163 +1,148 @@
-//THIS FILE CONTAINS THE SPECIFICATION FOR ALL OF THE INSTRUCTIONS
+{
+  "Basic_Ops":{
+    "MOV" : {
+      "name" : "Move",
+      "description" : "Moves a0 to a1. a1 cannot be a numeric constant.",
+      "mnemonic" : "MOV",
+      "args" : 2,
+      "allowed_a0" : ["ref","const","loc"],
+      "allowed_a1" : ["ref","loc"]
+    },
+    "INC" : {
+      "name" : "Increment",
+      "description" : "Increments a0",
+      "mnemonic" : "INC",
+      "args" : 1,
+      "allowed_a0" : ["ref","loc"]
+    },
+    "DEC" : {
+      "name" : "Decrement",
+      "description" : "Decrements a0",
+      "mnemonic" : "DEC",
+      "args" : 1,
+      "allowed_a0" : ["ref","loc"]
+    }
+  },
 
-//These are the basic instructions.
-//These do not fall into any other category.
-"Basic_Ops":[
-  {
-    "name" : "No Operation",
-    "description" : "No operation",
-    "mnemonic" : "NOP",
-    "args" : 0,
+  "Binary_Ops":{
+    "ADD" : {
+      "name" : "Add",
+      "description" : "Adds a0 and a1 and stores result on stack.",
+      "mnemonic" : "ADD"
+    },
+    "SUB" : {
+      "name" : "Subtract",
+      "description" : "Subtracts a1 from a0",
+      "mnemonic" : "SUB"
+    },
+    "MUL" : {
+      "name" : "Multiply",
+      "description" : "Multiplies a0 and a1",
+      "mnemonic" : "MUL"
+    },
+    "DIV" : {
+      "name" : "DIV",
+      "description" : "Divides a0 with a1",
+      "mnemonic" : "DIV"
+    },
+    "MOD" : {
+      "name" : "MOD",
+      "description" : "Adds a0 and a1 and stores result on stack.",
+      "mnemonic" : "ADD"
+    },
+    "EQL" : {
+      "name" : "Equal",
+      "description" : "Returns 1 if a0 and a1 are equal.",
+      "mnemonic" : "EQL"
+    },
+    "GRT" : {
+      "name" : "Greter than",
+      "description" : "Returns 1 if a0 is greater than a1",
+      "mnemonic" : "GRT"
+    },
+    "LES" : {
+      "name" : "Less than",
+      "description" : "Returns 1 if a0 is less than a1",
+      "mnemonic" : "LES"
+    },
+    "AND" : {
+      "name" : "And",
+      "description" : "Performs bitwise and on a0 and a1",
+      "mnemonic" : "AND"
+    },
+    "OR" : {
+      "name" : "Or",
+      "description" : "Performs bitwise or on a0 and a1",
+      "mnemonic" : "OR"
+    },
+    "XOR" : {
+      "name" : "Exclusive Or",
+      "description" : "Performs bitwise exclusive or on a0 and a1",
+      "mnemonic" : "XOR"
+    },
+    "ROT" : {
+      "name" : "Rotate",
+      "description" : "Performs unsigned left rotation of a0 by a1. If a1 < 0 a0 gets rotated to the right by -a1",
+      "mnemonic" : "ROT"
+    }
   },
-  {
-    "name" : "Move",
-    "description" : "Moves a0 to a1. a1 cannot be a numeric constant.",
-    "mnemonic" : "MOV",
-    "args" : 2,
-    "allowed_a0" : ["ref","const","loc"],
-    "allowed_a1" : ["ref","loc"],
+
+  "Unary_Ops":{
+    "NOT" : {
+      "name" : "Negation",
+      "description" : "Perform bitwise negation of a0",
+      "mnemonic" : "NOT"
+    }
   },
-  {
-    "name" : "Increment",
-    "description" : "Increments a0",
-    "mnemonic" : "INC",
-    "args" : 1,
-    "allowed_a0" : ["ref","loc"],
-  },
-  {
-    "name" : "Decrement",
-    "description" : "Decrements a0",
-    "mnemonic" : "DEC",
-    "args" : 1,
-    "allowed_a0" : ["ref","loc"],
+
+  "Control_Ops": {
+    "JOO" : {
+      "name" : "Jump on one",
+      "description" : "Jumps to a0 if stack is 1",
+      "mnemonic" : "JOO",
+      "args" : 1
+    },
+    "JOZ" : {
+      "name" : "Jump on zero",
+      "description" : "Jumps to a0 if stack is 0",
+      "mnemonic" : "JOZ",
+      "args" : 1
+    },
+    "SOO" : {
+      "name" : "Subroutine jump on 1",
+      "description" : "Performs a subroutine jump to a0 if stack is 1",
+      "mnemonic" : "SOO",
+      "args" : 1
+    },
+    "SOZ" : {
+      "name" : "Subroutine jump on 0",
+      "description" : "Performs a subroutine jump to a0 if stack is 0",
+      "mnemonic" : "SOZ",
+      "args" : 1
+    },
+    "JMP" : {
+      "name" : "Jump",
+      "description" : "Jump to a0",
+      "mnemonic" : "JMP",
+      "args" : 1
+    },
+    "JSR" : {
+      "name" : "Subroutine Jump",
+      "description" : "Perform a subroutine jump to a0",
+      "mnemonic" : "JSR",
+      "args" : 1
+    },
+    "RET" : {
+      "name" : "Return",
+      "description" : "Return from subroutine",
+      "mnemonic" : "RET",
+      "args" : 0
+    },
+    "HLT" : {
+      "name" : "Halt",
+      "description" : "Halts the VM",
+      "mnemonic" : "HLT",
+      "args" : 0
+    }
   }
-]
-
-
-//These are the binary operations.
-//They all take two arguments of any kind.
-//They all store the results on the stack.
-"Binary_Ops":[
-  {
-    "name" : "Add",
-    "description" : "Adds a0 and a1 and stores result on stack.",
-    "mnemonic" : "ADD",
-  },
-  {
-    "name" : "Subtract",
-    "description" : "Subtracts a1 from a0",
-    "mnemonic" : "SUB",
-  },
-  {
-    "name" : "Multiply",
-    "description" : "Multiplies a0 and a1",
-    "mnemonic" : "MUL",
-  },
-  {
-    "name" : "DIV",
-    "description" : "Divides a0 with a1",
-    "mnemonic" : "DIV",
-  },
-  {
-    "name" : "MOD",
-    "description" : "Adds a0 and a1 and stores result on stack.",
-    "mnemonic" : "ADD",
-  },
-  {
-    "name" : "Equal",
-    "description" : "Returns 1 if a0 and a1 are equal.",
-    "mnemonic" : "EQL",
-  },
-  {
-    "name" : "Greter than",
-    "description" : "Returns 1 if a0 is greater than a1",
-    "mnemonic" : "GRT",
-  },
-  {
-    "name" : "Less than",
-    "description" : "Returns 1 if a0 is less than a1",
-    "mnemonic" : "LES",
-  },
-  {
-    "name" : "And",
-    "description" : "Performs bitwise and on a0 and a1",
-    "mnemonic" : "AND",
-  },
-  {
-    "name" : "Or",
-    "description" : "Performs bitwise or on a0 and a1",
-    "mnemonic" : "OR",
-  },
-  {
-    "name" : "Exclusive Or",
-    "description" : "Performs bitwise exclusive or on a0 and a1",
-    "mnemonic" : "Or",
-  },
-  {
-    "name" : "Rotate",
-    "description" : "Performs unsigned left rotation of a0 by a1. If a1 < 0 a0 gets rotated to the right by -a1",
-    "mnemonic" : "ROT",
-  }
-]  
-
-//These are the unary operations.
-//They all take one arguments of any kind.
-//They all store the results on the stack.
-"Unary_Operations":[
-  {
-    "name" : "Negation",
-    "description" : "Perform bitwise negation of a0",
-    "mnemonic" : "NOT",
-  }
-
-]
-"Control_Instructions": [
-  {
-    "name" : "Jump on one",
-    "description" : "Jumps to a0 if stack is 1",
-    "mnemonic" : "JOO",
-    "args" : 1
-  },
-  {
-    "name" : "Jump on zero",
-    "description" : "Jumps to a0 if stack is 0",
-    "mnemonic" : "JOZ",
-    "args" : 1
-  },
-  {
-    "name" : "Subroutine jump on 1",
-    "description" : "Performs a subroutine jump to a0 if stack is 1",
-    "mnemonic" : "SOO",
-    "args" : 1
-  },
-  {
-    "name" : "Subroutine jump on 0",
-    "description" : "Performs a subroutine jump to a0 if stack is 0",
-    "mnemonic" : "SOZ",
-    "args" : 1
-  },
-  {
-    "name" : "Jump",
-    "description" : "Jump to a0",
-    "mnemonic" : "JMP",
-    "args" : 1
-  },
-  {
-    "name" : "Subroutine Jump",
-    "description" : "Perform a subroutine jump to a0",
-    "mnemonic" : "JSR",
-    "args" : 1
-  },
-  {
-    "name" : "Return",
-    "description" : "Return from subroutine",
-    "mnemonic" : "RET",
-    "args" : 0
-  },
-  {
-    "name" : "Halt",
-    "description" : "Halts the VM",
-    "mnemonic" : "HLT",
-    "args" : 0,
-  }
-]
+}

@@ -1,5 +1,8 @@
 import json as js
 
+def makeCDefine(name,value):
+    return "#define " + name + "\t" + value + "\n"
+
 def getHexConstant(n):
     hex_repr = hex(n)
     hex_repr = hex_repr.replace("0x","").zfill(16)
@@ -28,6 +31,103 @@ def maskBits(range):
     else:
         return bit_val << start -1
     
+class OperationsLayout():
+    basic_ops = {}
+    binary_ops = {}
+    unary_operations = {}
+    contron_instructions = {}
+    values = {}
+    binary_start = 0
+    unary_start = 0
+    control_start = 0
+    basic_ops   = None
+    binary_ops  = None
+    unary_ops   = None
+    control_ops = None
+    isa_object = None
+
+    argument_counts = {}
+
+    def __init__(self, isa_object, instruction_file):
+        json = js.load(open(instruction_file,'r'))
+        op_json = json
+        self.isa_object = isa_object
+        self.basic_ops   = op_json["Basic_Ops"]
+        self.binary_ops  = op_json["Binary_Ops"]
+        self.unary_ops   = op_json["Unary_Ops"]
+        self.control_ops = op_json["Control_Ops"]
+
+        self.buildValueMap()
+        self.makeArgumentCounts()
+        
+    def makeArgumentCounts(self):
+        for key, value in self.basic_ops.iteritems():
+            self.argument_counts.update({key : self.basic_ops[key]["args"]})
+        for key, value in self.control_ops.iteritems():
+            self.argument_counts.update({key : self.control_ops[key]["args"]})
+
+
+    def buildValueMap(self):
+        index = 1 #index 0 is reserved for NOP
+        for elem in self.basic_ops:
+            self.values.update({self.basic_ops[elem]["mnemonic"] : index})
+            index = index +1
+        self.binary_start = index + 1 
+
+        for elem in self.binary_ops:
+            self.values.update({self.binary_ops[elem]["mnemonic"] : index})
+            index = index +1
+        self.unary_start = index + 1
+
+        for elem in self.unary_ops:
+            self.values.update({self.unary_ops[elem]["mnemonic"] : index})
+            index = index +1
+        self.control_start = index + 1
+        
+        for elem in self.control_ops:
+            self.values.update({self.control_ops[elem]["mnemonic"] : index})
+            index = index +1
+
+    def makeValueDefines(self):
+        c_defines = ""
+        for key, value in self.values.iteritems():
+            c_defines += makeCDefine(key.upper()+"_VALUE",uhex(value))
+        return c_defines
+    
+    def makeArgumentCountDefines(self):
+        c_defines = ""
+        for key, value in self.argument_counts.iteritems():
+            c_defines += makeCDefine(key.upper()+"_ARG_COUNT",uhex(value))
+        return c_defines
+    
+    def makeHintDefines(self):
+        c_defines = ""
+        c_defines += makeCDefine("BINARY_START",uhex(self.binary_start << self.isa_object.shift_lengths["opcode_shift"]))
+        c_defines += makeCDefine("UNARY_START",uhex(self.unary_start << self.isa_object.shift_lengths["opcode_shift"]))
+        c_defines += makeCDefine("CONTROL_START",uhex(self.control_start << self.isa_object.shift_lengths["opcode_shift"]))
+        return c_defines
+
+    def makeHeaderFile(self):
+        header_text = "";
+        header_text += "/**\n"
+        header_text += "* This file contains the constats for all the instructions\n"
+        header_text += "* \n * The file was auto generated. DO NOT EDIT!\n\n"
+        header_text += "#ifndef _OPERATION_CONSTANTS_H\n"
+        header_text += "#define _OPERATION_CONSTANTS_H\n"
+        header_text += "//These are instruction hints\n"
+        header_text += "//Used to for performance\n"
+        header_text += self.makeHintDefines()
+        header_text += "\n//These are the argument counts for the\n"
+        header_text += "//special and control operations\n"
+        header_text += self.makeArgumentCountDefines()
+        header_text += "\n//These are the numeric values of the operations\n"
+        header_text += self.makeValueDefines()
+        header_text += "\n#endif"
+
+        header_file = open("operation_constants.h",'w')
+        header_file.write(header_text)
+        header_file.close()
+
 
 
 class InstructionLayout():
@@ -73,7 +173,7 @@ class InstructionLayout():
         for key, value in self.location_values.iteritems():
             print key  + ":\t" + (uhex(value))
 
-    def generateCHeader(self):
+    def makeHeaderFile(self):
         top_level_comment = "/**\n" 
         top_level_comment +="* This file contains the numerical constants for the\n"
         top_level_comment +="* instructions set architecture\n" 
@@ -104,10 +204,14 @@ class InstructionLayout():
 
         argument_constants += "\n\n"
 
-        return top_level_comment + include_guard + isa_comment + isa_constants + argument_constants + "#endif"
+        header_text =  top_level_comment + include_guard + isa_comment + isa_constants + argument_constants + "#endif"
+        header_file = open("isa_constants.h",'w')
+        header_file.write(header_text)
+        header_file.close()
 
 if __name__ == "__main__":
     print "Starting to generate constants"
     instruction_layout = InstructionLayout("ISA.json")
-    print instruction_layout.generateCHeader()
-
+    operations = OperationsLayout(instruction_layout, "instructions.json")
+    operations.makeHeaderFile()
+    instruction_layout.makeHeaderFile()
