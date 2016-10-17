@@ -20,7 +20,7 @@ E4C_DEFINE_EXCEPTION(VideoPageException, "Exception in videopage", SpecialPageEx
 E4C_DEFINE_EXCEPTION(HardwarePageException, "Exception in hardware page.", SpecialPageException);
 E4C_DEFINE_EXCEPTION(IrqPageException, "Exception in IRQ page.", SpecialPageException);
 
-fml_ram *newRam(size_t size, size_t prg_size){
+fml_ram *create_ram(size_t size, size_t prg_size){
   fml_ram *ram = malloc(sizeof(fml_ram));
   ram->ram_size = (fml_addr)size;
   ram->prg_size = (fml_addr)prg_size;
@@ -33,7 +33,7 @@ fml_ram *newRam(size_t size, size_t prg_size){
   return ram;
 }
 
-void destroyRam(fml_ram *ram){
+void destroy_ram(fml_ram *ram){
   free(ram->ram);
   free(ram->prg_ram);
   //TODO: Implement freeing of pages

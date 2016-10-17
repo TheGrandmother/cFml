@@ -11,14 +11,14 @@
 #include "../constants.h"
 #include "../components.h"
 
-void createAndDestroy(){
-  fml_ram *ram = newRam(10);
-  destroyRam(ram);
+void create_and_destroy(){
+  fml_ram *ram = create_ram(10);
+  destroy_ram(ram);
 }
 
-void writeAndRead(){
+void write_and_read(){
   size_t size = 100;
-  fml_ram *ram = newRam(size);
+  fml_ram *ram = create_ram(size);
 
   srand(time(NULL));
   for(int i = 0; i < 10000; i++){
@@ -33,12 +33,12 @@ void writeAndRead(){
       CU_FAIL("Caught RamException");
     }
   }
-  destroyRam(ram);
+  destroy_ram(ram);
 }
 
-void testInvalidAddr(){
+void test_invalid_addr(){
   size_t size = 10;
-  fml_ram *ram = newRam(size);
+  fml_ram *ram = create_ram(size);
 
 
   bool thrown = false;
@@ -58,9 +58,9 @@ void testInvalidAddr(){
   CU_ASSERT(thrown); //Check that correct exception was thrown
 }
 
-void testInvalidPage(){
+void test_invalid_page(){
   size_t size = 10;
-  fml_ram *ram = newRam(size);
+  fml_ram *ram = create_ram(size);
 
   bool thrown =false;
   E4C_TRY{

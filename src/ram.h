@@ -16,13 +16,13 @@ E4C_DECLARE_EXCEPTION(IrqPageException);
  * This function also creates new pages (not yet implemented)
  * @param size the size of the new ram..
  */
-fml_ram *newRam(size_t size);
+fml_ram *create_ram(size_t size,size_t prg_size);
 
 /** Destroys the ram object.
  *
  * @param ram The object to be destroyed.
  */
-void destroyRam(fml_ram *ram);
+void destroy_ram(fml_ram *ram);
 
 /** Reads a word from the ram.
  * 

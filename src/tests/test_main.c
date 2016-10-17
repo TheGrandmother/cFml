@@ -23,10 +23,10 @@ int main(){
    };
 
    CU_TestInfo ram_tests[] = {
-     {"Testing build and destroy.", createAndDestroy},
-     {"Testing read and write.", writeAndRead},
-     {"Testing invalid address.", testInvalidAddr},
-     {"Testing invalid page.", testInvalidPage},
+     {"Testing build and destroy.", create_and_destroy},
+     {"Testing read and write.", write_and_read},
+     {"Testing invalid address.", test_invalid_addr},
+     {"Testing invalid page.", test_invalid_page},
      CU_TEST_INFO_NULL,
    };
 
@@ -38,39 +38,14 @@ int main(){
 
    /* add a suite to the registry */
    CU_register_suites(suites);
-   //if (CU_register_suites(suites)) {
-   //   printf("DOING STUFF\n");
-   //   CU_cleanup_registry();
-   //   return CU_get_error();
-   //}
-
-   ///* add the tests to the suite */
-   //if ( 
-   //    (NULL == CU_add_test(pSuite, "Testing build and destroy.", stack_build_and_destroy)) ||
-   //    (NULL == CU_add_test(pSuite, "Standard stack test.", stack_standard_test)) ||
-   //    (NULL == CU_add_test(pSuite, "Test empty exception", testEmptyException)) ||
-   //    (NULL == CU_add_test(pSuite, "Test Overflow exception", testOverflowException)) 
-   //   )
-   //{
-   //   CU_cleanup_registry();
-   //   return CU_get_error();
-   //}
 
    // Run all tests using the basic interface
    CU_basic_set_mode(CU_BRM_VERBOSE);
    CU_basic_run_tests();
    printf("\n");
-   CU_basic_show_failures(CU_get_failure_list());
-   //printf("\n\n");
-/*
-   // Run all tests using the automated interface
-   CU_automated_run_tests();
-   CU_list_tests_to_file();
 
-   // Run all tests using the console interface
-   CU_console_run_tests();
-*/
-   /* Clean up registry and return */
+   CU_basic_show_failures(CU_get_failure_list());
    CU_cleanup_registry();
+
    return CU_get_error();
 }
