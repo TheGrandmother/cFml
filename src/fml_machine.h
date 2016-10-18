@@ -7,6 +7,8 @@
 
 fml_machine *create_machine(size_t ram_size, size_t prg_size, size_t acc_size, size_t js_size);
 void destroy_machine(fml_machine *fml);
+void soft_reset(fml_machine *fml);
+void hard_reset(fml_machine *fml);
 
 #endif
 

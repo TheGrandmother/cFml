@@ -1,3 +1,4 @@
+#include "e4c/e4c_lite.h"
 #include "constants/isa_constants.h"
 #include "constants/operation_constants.h"
 #include "components.h"
@@ -39,8 +40,9 @@ fml_word read_argument(fml_word arg, fml_machine *self, fml_addr offs){
 void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val){
   if((arg & ADDRESS_MASK) != 0){
     //We get the address as we should have gotten a normal argument.
-    fml_addr addr = read_argument(arg, self, offs);
+    fml_addr addr = read_argument(arg & LOCATION_MASK, self, offs);
     addr += (arg & SP_MASK) != 0 ? self->sp : 0;  
+    printf("wiriting to address 0x%LX\n",addr);
     write(self->ram,addr,val);
   }else{
     switch(arg & LOCATION_MASK){
@@ -52,7 +54,9 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
         break;
       case CONSTANT:
         //Not allowed!!!!
-        fprintf(stderr,"Attempting to write to constant.");
+        //TODO: Throw exception
+        fprintf(stderr,"Attempting to write to constant.\n");
+        exit(1);
         break;
       case ACC_STACK:
         push(self->s,val);
@@ -60,24 +64,31 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
       default:
         //This should not happen.
         //TODO: Throw exception
-        fprintf(stderr,"Undefined argument location !?");
+        fprintf(stderr,"Undefined argument location !?\n");
         break;
     }
   }
 }
 
-int eval(fml_machine *self){
+int eval(fml_machine *self, uint64_t max_steps){
   puts("Entered eval function");
+  uint64_t steps = 0;
   while(!self->halt){
-    puts("evaluating");
+    puts("");
+    printf("Evaluating at 0x%LX\n",self->pc);
     fml_word instruction = self->ram->prg_ram[self->pc];
-    printf("Current instruction is %X\n",instruction);
+    printf("Current instruction is 0x%X\n",instruction);
 
     fml_addr step_length = (instruction & STEP_MASK) >> STEP_SHIFT;
 
     if(instruction != NOP){
       fml_word op_index = (instruction & OPCODE_MASK) >> OPCODE_SHIFT;
-      printf("Op index is %LX\n",op_index);
+      printf("Op index is\t 0x%LX\n",op_index);
+      printf("Step len is\t 0x%LX\n",op_index);
+      printf("Arg_0 is\t 0x%LX. Arg_1 is 0x%LX\n",
+          (instruction & A0_MASK) >> A0_SHIFT,
+          (instruction & A1_MASK) >> A1_SHIFT
+          );
 
       if(op_index >= OPERATIONS_END){
         //Invalid operation
@@ -91,17 +102,20 @@ int eval(fml_machine *self){
         if(op_index < BINARY_START){
           //Special Operations
             fml_word val = 0;
+            val = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+            printf("Read value 0x%LX(%lu)\n",val,val);
           switch(op_index){
-            val = read_argument(instruction & A0_MASK >> A0_SHIFT, self, A0_OFFS);
           case(INC_VALUE):
-            puts("Executing print");
-            write_argument(instruction & A0_MASK >> A0_SHIFT, self, A0_OFFS, val + 1);
+            puts("Executing INC");
+            write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val + 1);
             break;
           case(DEC_VALUE):
-            write_argument(instruction & A0_MASK >> A0_SHIFT, self, A0_OFFS, val - 1);
+            puts("Executing DEC");
+            write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val - 1);
             break;
           case(MOV_VALUE):
-            write_argument(instruction & A1_MASK >> A1_SHIFT, self, A1_OFFS, val);
+            puts("Executing MOV");
+            write_argument((instruction & A1_MASK) >> A1_SHIFT, self, A1_OFFS, val);
             break;
           }
         
@@ -112,9 +126,7 @@ int eval(fml_machine *self){
           //Unary Operators
           fprintf(stderr,"Not implemented");
         }
-
         self->pc += step_length;
-        continue;
 
       }else{
         //Control operations. 
@@ -132,6 +144,12 @@ int eval(fml_machine *self){
       }
     }else{
       self->pc++;
+    }
+    if(steps != max_steps){
+    steps++;
+    }else{
+      fprintf(stderr, "Exceeding maximum steps.\n");
+      return 2;
     }
   }
   return 0;

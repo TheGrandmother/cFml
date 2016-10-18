@@ -1,5 +1,5 @@
 C_FLAGS = -Wall -std=c11 -ggdb
-COMPILER = gcc
+COMPILER = clang
 
 test: e4c_lite.o eval_test.o stack_test.o stack.o ram.o ram_test.o tests/test_main.c fml_machine.o eval.o
 	$(COMPILER) $(C_FLAGS)  -L/usr/local/lib  $^ -o ../bin/test -lcunit
@@ -24,7 +24,6 @@ stack.o: stack.c stack.h components.h e4c_lite.o
 
 ram.o: ram.c ram.h components.h constants.h types.h e4c_lite.o
 	$(COMPILER) $(C_FLAGS) -c $^
-
 
 #This produces an error that i simply just does not understand :p
 e4c_lite.o: e4c/e4c_lite.c  e4c/e4c_lite.h

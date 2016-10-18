@@ -18,5 +18,8 @@
 
 void machine_create_and_destroy();
 void test_inc();
+void test_mov_const_x();
+void test_mov_const_mem();
+void test_mov_const_s();
 
 #endif

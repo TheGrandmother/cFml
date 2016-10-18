@@ -5,8 +5,15 @@
 #include "ram_test.h"
 #include "eval_test.h"
 
+#define TEST_SUITE(NAME, SUITE_NAME) {NAME, init_suite, clean_suite, set_up, tear_down, SUITE_NAME},
+
+#ifdef OLD_CUNIT
+#define TEST_SUITE(NAME, SUITE_NAME) {NAME, init_suite, clean_suite, SUITE_NAME},
+#endif
 int init_suite(void) { return 0; }
 int clean_suite(void) { return 0; }
+void set_up(void) {}
+void tear_down(void) {}
 
 int main(){
 
@@ -32,14 +39,17 @@ int main(){
 
    CU_TestInfo eval_tests[] = {
      {"Testing build and destroy.", machine_create_and_destroy},
-     {"Testing Inc", test_inc},
+     {"Testing INC x", test_inc},
+     {"Testing MOV 420 x", test_mov_const_x},
+     {"Testing MOV 420 $42", test_mov_const_mem},
+     {"Testing MOV 420 s", test_mov_const_s},
      CU_TEST_INFO_NULL,
    };
 
    CU_SuiteInfo suites[] = {
-     { "Testing Stack", init_suite, clean_suite, stack_tests},
-     { "Testing Ram", init_suite, clean_suite, ram_tests},
-     { "Testing Eval", init_suite, clean_suite, eval_tests},
+     TEST_SUITE("Testing Stack", stack_tests)
+     TEST_SUITE("Testing Ram"  , ram_tests)
+     TEST_SUITE("Testing Eval" , eval_tests) 
      CU_SUITE_INFO_NULL,
    };
 
