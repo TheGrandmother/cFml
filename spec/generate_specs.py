@@ -12,7 +12,7 @@ def getHexConstant(n):
     return hex_repr
 
 def uhex(n):
-    return hex(n) + "U"
+    return hex(n) + "ULL"
 
 def generateMask(range):
     start = range[0]
