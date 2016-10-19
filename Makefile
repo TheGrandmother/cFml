@@ -2,7 +2,7 @@
 C_FLAGS = -Wall -std=c11 -ggdb
 COMPILER = gcc
 
-bin/test: FORCE
+test: FORCE
 	make -C src test
 	./bin/test
 
