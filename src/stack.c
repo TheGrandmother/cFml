@@ -7,6 +7,7 @@
 #include "fail.h"
 #include "e4c/e4c_lite.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 E4C_DEFINE_EXCEPTION(StackException, "Stack Exception.", RuntimeException);
 E4C_DEFINE_EXCEPTION(StackEmptyException, "Stack empty.", StackException);
@@ -17,24 +18,30 @@ fml_stack *new_stack(size_t size){
   fml_stack *stack = malloc(size * sizeof(fml_stack));
   stack->size = size;
   stack->index = 0;
+  stack->empty = true;
+  stack->full = false;
   stack->array = calloc(size, sizeof(fml_word));
   return stack;
 }
 
 void push(fml_stack *stack, fml_word data){
-  if(stack->index < stack->size){
+  if(!stack->full){
+    stack->empty = false;
     stack->array[stack->index] = data;
-    stack->index = 
-      (stack->index == stack->size - 1) ? stack->index : stack->index + 1;
+    stack->index = stack->index + 1;
+    stack->full =
+      (stack->index == stack->size);
   }else{
     E4C_THROW(StackOverflowException,NULL);
   }
 }
 
 fml_word pop(fml_stack *stack){
-  if(stack->index >= 0){
+  if(!stack->empty){
+    stack->full = false;
+    stack->index--;
     fml_word ret  = stack->array[stack->index];
-    stack->index = (stack->index == 0) ? 0 : stack->index - 1;
+    stack->empty = (stack->index == 0);
     return ret;
   }else{
     E4C_THROW(StackEmptyException,NULL);
@@ -51,7 +58,10 @@ void print_stack(fml_stack *stack){
 }
 
 fml_word peep(fml_stack *stack){
-  return stack->array[stack->index];
+  if(stack->index == 0){
+    E4C_THROW(StackEmptyException,NULL);
+  }
+  return stack->array[stack->index-1];
 }
 
 void destroy_stack(fml_stack *stack){

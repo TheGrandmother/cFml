@@ -5,11 +5,14 @@
 #include "ram_test.h"
 #include "eval_test.h"
 
-#define TEST_SUITE(NAME, SUITE_NAME) {NAME, init_suite, clean_suite, set_up, tear_down, SUITE_NAME},
 
+#define OLD_CUNIT
 #ifdef OLD_CUNIT
 #define TEST_SUITE(NAME, SUITE_NAME) {NAME, init_suite, clean_suite, SUITE_NAME},
+#else
+#define TEST_SUITE(NAME, SUITE_NAME) {NAME, init_suite, clean_suite, set_up, tear_down, SUITE_NAME},
 #endif
+
 int init_suite(void) { return 0; }
 int clean_suite(void) { return 0; }
 void set_up(void) {}
@@ -24,8 +27,9 @@ int main(){
    CU_TestInfo stack_tests[] = {
      {"Testing build and destroy.", stack_build_and_destroy},
      {"Standard stack test.", stack_standard_test},
-     {"Test empty exception", testEmptyException},
-     {"Test Overflow exception", testOverflowException},
+     {"Test empty exception", test_empty_exception},
+     {"Test Overflow exception", test_overflow_exception},
+     {"Test single push and pop",test_single_push_n_pop},
      CU_TEST_INFO_NULL,
    };
 

@@ -21,8 +21,10 @@ void stack_standard_test(){
       push(stack,input[i]);
     }
   }E4C_CATCH(StackEmptyException){
+    print_stack(stack);
     CU_FAIL_FATAL("StackEmpytException occured during sensible stack push.")
   }E4C_CATCH(StackOverflowException){
+    print_stack(stack);
     CU_FAIL_FATAL("StackOverflowException occured during sensible stack push.")
   }
 
@@ -31,20 +33,52 @@ void stack_standard_test(){
       output[i] = pop(stack);
     }
   }E4C_CATCH(StackEmptyException){
+    print_stack(stack);
     CU_FAIL("StackEmpytException occured during sensible stack pop.")
   }E4C_CATCH(StackOverflowException){
+    print_stack(stack);
     CU_FAIL("StackOverflowException occured during sensible stack pop.")
   }
 
   for(int i = 0 ; i < 5; i++){
     if(input[i] != output[i]){
+      print_stack(stack);
       CU_FAIL("Stack corrupted data."); 
     }
   }
   destroy_stack(stack);
 }
 
-void testEmptyException(){
+void test_single_push_n_pop(){
+  fml_stack *stack = new_stack(5);
+
+  E4C_TRY{
+    push(stack,420);
+  }E4C_CATCH(StackEmptyException){
+    CU_FAIL_FATAL("StackEmpytException occured during sensible stack push.")
+  }E4C_CATCH(StackOverflowException){
+    CU_FAIL_FATAL("StackOverflowException occured during sensible stack push.")
+  }
+
+  
+  fml_word head;
+  E4C_TRY{
+    head = pop(stack);
+  }E4C_CATCH(StackEmptyException){
+    CU_FAIL("StackEmpytException occured during sensible stack pop.")
+  }E4C_CATCH(StackOverflowException){
+    CU_FAIL("StackOverflowException occured during sensible stack pop.")
+  }
+
+  printf("EAAAAAAAAAAAD Head is %d\n",head);
+  print_stack(stack);
+  CU_ASSERT_EQUAL(head, 420);
+
+  destroy_stack(stack);
+
+}
+
+void test_empty_exception(){
   fml_stack *stack = new_stack(5);
   E4C_TRY{
     pop(stack); 
@@ -57,7 +91,7 @@ void testEmptyException(){
   destroy_stack(stack);
 }
 
-void testOverflowException(){
+void test_overflow_exception(){
   fml_stack *stack = new_stack(5);
   E4C_TRY{
     int i;

@@ -10,6 +10,7 @@
 #include "hardware_page.h"
 #include "video_page.h"
 #include "irq_page.h"
+#include <stdbool.h>
 
 #ifndef _COMPONENTS_H
 #define _COMPONENTS_H
@@ -18,6 +19,8 @@ typedef struct{
   fml_word* array;
   size_t index;
   size_t size;
+  bool empty;
+  bool full;
 }fml_stack;
 
 typedef struct{
