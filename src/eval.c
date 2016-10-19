@@ -47,9 +47,11 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
   }else{
     switch(arg & LOCATION_MASK){
       case REG_X:
+        printf("Writing 0x%LX to x\n",val);
         self->x = val;
         break;
       case REG_Y:
+        printf("Writing 0x%LX to y\n",val);
         self->y = val;
         break;
       case CONSTANT:
@@ -59,6 +61,7 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
         exit(1);
         break;
       case ACC_STACK:
+        printf("Writing 0x%LX to s\n",val);
         push(self->s,val);
         break;
       default:

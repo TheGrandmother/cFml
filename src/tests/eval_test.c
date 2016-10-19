@@ -77,8 +77,8 @@ void test_mov_const_s(){
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
 
   CU_ASSERT_EQUAL(eval(fml,2),0);
-  printf("Stack is: %LX\n",peep(fml->s));
-  print_stack(fml->s);
+  //printf("Stack is: %LX\n",peep(fml->s));
+  //print_stack(fml->s);
   CU_ASSERT_EQUAL(peep(fml->s), 420);
 
   destroy_machine(fml);
