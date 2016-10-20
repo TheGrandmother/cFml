@@ -47,8 +47,8 @@
     },
     "MOD" : {
       "name" : "MOD",
-      "description" : "Adds a0 and a1 and stores result on stack.",
-      "mnemonic" : "ADD"
+      "description" : "Performs a0 mod a1. Behaviour not well defined.",
+      "mnemonic" : "MOD"
     },
     "EQL" : {
       "name" : "Equal",

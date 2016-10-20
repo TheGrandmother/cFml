@@ -11,48 +11,49 @@
 
 //These are instruction hints
 //Used to for performance
-#define BINARY_START	0x5U
-#define UNARY_START	0x11U
-#define CONTROL_START	0x12U
-#define OPERATIONS_END	0x19U
+#define BINARY_START	0x5ULL
+#define UNARY_START	0x11ULL
+#define CONTROL_START	0x12ULL
+#define OPERATIONS_END	0x19ULL
 
 //These are the argument counts for the
 //special and control operations
-#define DEC_ARG_COUNT	0x1U
-#define JMP_ARG_COUNT	0x1U
-#define HLT_ARG_COUNT	0x0U
-#define MOV_ARG_COUNT	0x2U
-#define RET_ARG_COUNT	0x0U
-#define SOO_ARG_COUNT	0x1U
-#define JSR_ARG_COUNT	0x1U
-#define JOO_ARG_COUNT	0x1U
-#define SOZ_ARG_COUNT	0x1U
-#define JOZ_ARG_COUNT	0x1U
-#define INC_ARG_COUNT	0x1U
+#define DEC_ARG_COUNT	0x1ULL
+#define JMP_ARG_COUNT	0x1ULL
+#define HLT_ARG_COUNT	0x0ULL
+#define MOV_ARG_COUNT	0x2ULL
+#define RET_ARG_COUNT	0x0ULL
+#define SOO_ARG_COUNT	0x1ULL
+#define JSR_ARG_COUNT	0x1ULL
+#define JOO_ARG_COUNT	0x1ULL
+#define SOZ_ARG_COUNT	0x1ULL
+#define JOZ_ARG_COUNT	0x1ULL
+#define INC_ARG_COUNT	0x1ULL
 
 //These are the numeric values of the operations
-#define GRT_VALUE	0x5U
-#define XOR_VALUE	0x6U
-#define SUB_VALUE	0x7U
-#define RET_VALUE	0x14U
-#define ADD_VALUE	0xfU
-#define EQL_VALUE	0xaU
-#define MUL_VALUE	0xbU
-#define DIV_VALUE	0xcU
-#define DEC_VALUE	0x1U
-#define AND_VALUE	0x4U
-#define JMP_VALUE	0x17U
-#define JOZ_VALUE	0x11U
-#define HLT_VALUE	0x12U
-#define MOV_VALUE	0x2U
-#define SOO_VALUE	0x13U
-#define LES_VALUE	0x9U
-#define JSR_VALUE	0x15U
-#define NOT_VALUE	0x10U
-#define JOO_VALUE	0x18U
-#define SOZ_VALUE	0x16U
-#define ROT_VALUE	0xdU
-#define OR_VALUE	0xeU
-#define INC_VALUE	0x3U
+#define GRT_VALUE	0x5ULL
+#define XOR_VALUE	0x6ULL
+#define SUB_VALUE	0x7ULL
+#define RET_VALUE	0x14ULL
+#define ADD_VALUE	0x8ULL
+#define EQL_VALUE	0xaULL
+#define MUL_VALUE	0xbULL
+#define DIV_VALUE	0xcULL
+#define DEC_VALUE	0x1ULL
+#define AND_VALUE	0x4ULL
+#define SOZ_VALUE	0x16ULL
+#define JMP_VALUE	0x17ULL
+#define JOZ_VALUE	0x11ULL
+#define HLT_VALUE	0x12ULL
+#define MOV_VALUE	0x2ULL
+#define SOO_VALUE	0x13ULL
+#define LES_VALUE	0x9ULL
+#define JSR_VALUE	0x15ULL
+#define NOT_VALUE	0x10ULL
+#define JOO_VALUE	0x18ULL
+#define INC_VALUE	0x3ULL
+#define ROT_VALUE	0xdULL
+#define OR_VALUE	0xeULL
+#define MOD_VALUE	0xfULL
 
 #endif
