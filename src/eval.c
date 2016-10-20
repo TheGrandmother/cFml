@@ -1,11 +1,22 @@
 #include "e4c/e4c_lite.h"
 #include "constants/isa_constants.h"
 #include "constants/operation_constants.h"
+#include "constants/binop_eval.h"
+#include "exceptions.h"
 #include "components.h"
 #include "stack.h"
 #include "ram.h"
 #include <stdio.h>
+E4C_DEFINE_EXCEPTION(FmlException, "General FML exception", RuntimeException);
+E4C_DEFINE_EXCEPTION(NotImplementedException, "Instruction Not Implemented", FmlException);
+E4C_DEFINE_EXCEPTION(ArithmeticException, "General Arithmetic exception", FmlException);
+E4C_DEFINE_EXCEPTION(DivByZeroException, "Div by 0 exception", ArithmeticException);
+E4C_DEFINE_EXCEPTION(ModByZeroException, "Mod by 0 exception", ArithmeticException);
+E4C_DEFINE_EXCEPTION(InstructionException, "General Instruction Exception", FmlException);
+E4C_DEFINE_EXCEPTION(MoveToConstantException, "Move To Constant Exception", InstructionException);
+E4C_DEFINE_EXCEPTION(InvalidOperationException, "Invalid Operation", InstructionException);
 
+extern inline fml_word eval_binop(fml_word, fml_word, fml_word);
 
 fml_word read_argument(fml_word arg, fml_machine *self, fml_addr offs){
   fml_word val = 0;
@@ -23,9 +34,8 @@ fml_word read_argument(fml_word arg, fml_machine *self, fml_addr offs){
       val = pop(self->s);
       break;
     default:
-      //This should not happen.
-      //TODO: Throw exception
       fprintf(stderr,"Undefined argument location !?");
+      E4C_THROW(FmlException,NULL);
       break;
   }
 
@@ -42,32 +52,29 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
     //We get the address as we should have gotten a normal argument.
     fml_addr addr = read_argument(arg & LOCATION_MASK, self, offs);
     addr += (arg & SP_MASK) != 0 ? self->sp : 0;  
-    printf("wiriting to address 0x%LX\n",addr);
+    printf("wiriting to address 0x%lX\n",addr);
     write(self->ram,addr,val);
   }else{
     switch(arg & LOCATION_MASK){
       case REG_X:
-        printf("Writing 0x%LX to x\n",val);
+        printf("Writing 0x%lx to x\n",val);
         self->x = val;
         break;
       case REG_Y:
-        printf("Writing 0x%LX to y\n",val);
+        printf("Writing 0x%lx to y\n",val);
         self->y = val;
         break;
       case CONSTANT:
-        //Not allowed!!!!
-        //TODO: Throw exception
         fprintf(stderr,"Attempting to write to constant.\n");
-        exit(1);
+        E4C_THROW(MoveToConstantException, NULL);
         break;
       case ACC_STACK:
-        printf("Writing 0x%LX to s\n",val);
+        printf("Writing 0x%lx to s\n",val);
         push(self->s,val);
         break;
       default:
-        //This should not happen.
-        //TODO: Throw exception
         fprintf(stderr,"Undefined argument location !?\n");
+        E4C_THROW(FmlException,NULL);
         break;
     }
   }
@@ -78,56 +85,54 @@ int eval(fml_machine *self, uint64_t max_steps){
   uint64_t steps = 0;
   while(!self->halt){
     puts("");
-    printf("Evaluating at 0x%LX\n",self->pc);
+    printf("Evaluating at 0x%lx\n",self->pc);
     fml_word instruction = self->ram->prg_ram[self->pc];
-    printf("Current instruction is 0x%X\n",instruction);
+    printf("Current instruction is 0x%lX\n",instruction);
 
     fml_addr step_length = (instruction & STEP_MASK) >> STEP_SHIFT;
 
     if(instruction != NOP){
       fml_word op_index = (instruction & OPCODE_MASK) >> OPCODE_SHIFT;
-      printf("Op index is\t 0x%LX\n",op_index);
-      printf("Step len is\t 0x%LX\n",op_index);
+      printf("Op index is\t 0x%lx\n",op_index);
+      printf("Step len is\t 0x%lx\n",step_length);
       printf("Arg_0 is\t 0x%LX. Arg_1 is 0x%LX\n",
           (instruction & A0_MASK) >> A0_SHIFT,
           (instruction & A1_MASK) >> A1_SHIFT
           );
 
       if(op_index >= OPERATIONS_END){
-        //Invalid operation
-        //TODO: Throw exception
         fprintf(stderr,"Operation out of bounds: %lu(%lX)\n",op_index,op_index);
+        E4C_THROW(InvalidOperationException,NULL);
         return 1;
       }
 
       if(op_index < CONTROL_START){
-        puts("Not a control operation.");
         if(op_index < BINARY_START){
           //Special Operations
             fml_word val = 0;
             val = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
-            printf("Read value 0x%LX(%lu)\n",val,val);
-          switch(op_index){
-          case(INC_VALUE):
-            puts("Executing INC");
-            write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val + 1);
-            break;
-          case(DEC_VALUE):
-            puts("Executing DEC");
-            write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val - 1);
-            break;
-          case(MOV_VALUE):
-            puts("Executing MOV");
-            write_argument((instruction & A1_MASK) >> A1_SHIFT, self, A1_OFFS, val);
-            break;
-          }
+            printf("Read value 0x%lx(%lu)\n",val,val);
+            switch(op_index){
+              case(INC_VALUE):
+                write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val + 1);
+                break;
+              case(DEC_VALUE):
+                write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val - 1);
+                break;
+              case(MOV_VALUE):
+                write_argument((instruction & A1_MASK) >> A1_SHIFT, self, A1_OFFS, val);
+                break;
+            }
         
         }else if(op_index < UNARY_START){
           //Binary Operations
-          fprintf(stderr,"Not implemented");
+          fml_word a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+          fml_word a1 = read_argument((instruction & A1_MASK) >> A1_SHIFT, self, A1_OFFS);
+          push(self->s,eval_binop(op_index, a0, a1));
         }else{
           //Unary Operators
           fprintf(stderr,"Not implemented");
+          E4C_THROW(NotImplementedException,NULL);
         }
         self->pc += step_length;
 
@@ -141,6 +146,7 @@ int eval(fml_machine *self, uint64_t max_steps){
             break;
           default:
             fprintf(stderr,"Not implemented");
+            E4C_THROW(NotImplementedException,NULL);
             break;
         }
       

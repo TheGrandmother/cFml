@@ -7,7 +7,7 @@ test: e4c_lite.o eval_test.o stack_test.o stack.o ram.o ram_test.o tests/test_ma
 eval_test.o: tests/eval_test.c eval.o fml_machine.o
 	$(COMPILER) $(C_FLAGS) -c $^
 
-eval.o: eval.c eval.h fml_machine.o e4c_lite.o
+eval.o: eval.c eval.h constants/binop_eval.h fml_machine.o e4c_lite.o 
 	$(COMPILER) $(C_FLAGS) -c $^
 
 fml_machine.o: fml_machine.c fml_machine.h ram.o stack.o e4c_lite.o
