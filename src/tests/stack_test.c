@@ -70,8 +70,6 @@ void test_single_push_n_pop(){
     CU_FAIL("StackOverflowException occured during sensible stack pop.")
   }
 
-  printf("EAAAAAAAAAAAD Head is %d\n",head);
-  print_stack(stack);
   CU_ASSERT_EQUAL(head, 420);
 
   destroy_stack(stack);
