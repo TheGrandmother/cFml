@@ -48,16 +48,16 @@
       "description" : "Divides a0 with a1",
       "mnemonic" : "DIV",
       "operation" : "a0 / a1",
-      "check" : "a1 != a0",
-      "fail_action" : "fprintf(stderr,\"Division by zero\\n\"); E4C_THROW(RuntimeException, NULL)"
+      "check" : "a1 != 0",
+      "fail_action" : "fprintf(stderr,\"Division by zero\\n\"); E4C_THROW(DivByZeroException, NULL)"
     },
     "MOD" : {
       "name" : "MOD",
       "description" : "Performs a0 mod a1. Behaviour not well defined.",
       "mnemonic" : "MOD",
       "operation" : "a0 % a1",
-      "check" : "a1 != a0",
-      "fail_action" : "fprintf(stderr,\"Mod by zero\\n\"); E4C_THROW(RuntimeException, NULL)"
+      "check" : "a1 != 0",
+      "fail_action" : "fprintf(stderr,\"Mod by zero\\n\"); E4C_THROW(ModByZeroException, NULL)"
     },
     "EQL" : {
       "name" : "Equal",
