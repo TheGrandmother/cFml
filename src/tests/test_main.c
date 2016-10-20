@@ -6,7 +6,6 @@
 #include "eval_test.h"
 
 
-#define OLD_CUNIT
 #ifdef OLD_CUNIT
 #define TEST_SUITE(NAME, SUITE_NAME) {NAME, init_suite, clean_suite, SUITE_NAME},
 #else
@@ -47,6 +46,9 @@ int main(){
      {"Testing MOV 420 x", test_mov_const_x},
      {"Testing MOV 420 $42", test_mov_const_mem},
      {"Testing MOV 420 s", test_mov_const_s},
+     {"Testing ADD 20 400", test_add_c_c},
+     {"Testing DIV 420 0", test_div_420_0_fail},
+     {"Testing MOD 420 0", test_mod_420_0_fail},
      CU_TEST_INFO_NULL,
    };
 

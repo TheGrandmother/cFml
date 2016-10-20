@@ -21,5 +21,8 @@ void test_inc();
 void test_mov_const_x();
 void test_mov_const_mem();
 void test_mov_const_s();
+void test_add_c_c();
+void test_div_420_0_fail();
+void test_mod_420_0_fail();
 
 #endif
