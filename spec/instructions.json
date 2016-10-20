@@ -28,62 +28,78 @@
     "ADD" : {
       "name" : "Add",
       "description" : "Adds a0 and a1 and stores result on stack.",
-      "mnemonic" : "ADD"
+      "mnemonic" : "ADD",
+      "operation" : "a0 + a1"
     },
     "SUB" : {
       "name" : "Subtract",
       "description" : "Subtracts a1 from a0",
-      "mnemonic" : "SUB"
+      "mnemonic" : "SUB",
+      "operation" : "a0 - a1"
     },
     "MUL" : {
       "name" : "Multiply",
       "description" : "Multiplies a0 and a1",
-      "mnemonic" : "MUL"
+      "mnemonic" : "MUL",
+      "operation" : "a0 * a1"
     },
     "DIV" : {
       "name" : "DIV",
       "description" : "Divides a0 with a1",
-      "mnemonic" : "DIV"
+      "mnemonic" : "DIV",
+      "operation" : "a0 / a1",
+      "check" : "a1 != a0",
+      "fail_action" : "fprintf(stderr,\"Division by zero\\n\"); E4C_THROW(RuntimeException, NULL)"
     },
     "MOD" : {
       "name" : "MOD",
       "description" : "Performs a0 mod a1. Behaviour not well defined.",
-      "mnemonic" : "MOD"
+      "mnemonic" : "MOD",
+      "operation" : "a0 % a1",
+      "check" : "a1 != a0",
+      "fail_action" : "fprintf(stderr,\"Mod by zero\\n\"); E4C_THROW(RuntimeException, NULL)"
     },
     "EQL" : {
       "name" : "Equal",
       "description" : "Returns 1 if a0 and a1 are equal.",
-      "mnemonic" : "EQL"
+      "mnemonic" : "EQL",
+      "operation" : "a0 == a1"
     },
     "GRT" : {
       "name" : "Greter than",
       "description" : "Returns 1 if a0 is greater than a1",
-      "mnemonic" : "GRT"
+      "mnemonic" : "GRT",
+      "operation" : "a0 > a1"
     },
     "LES" : {
       "name" : "Less than",
       "description" : "Returns 1 if a0 is less than a1",
-      "mnemonic" : "LES"
+      "mnemonic" : "LES",
+      "operation" : "a0 < a1"
     },
     "AND" : {
       "name" : "And",
       "description" : "Performs bitwise and on a0 and a1",
-      "mnemonic" : "AND"
+      "mnemonic" : "AND",
+      "operation" : "a0 & a1"
     },
     "OR" : {
       "name" : "Or",
       "description" : "Performs bitwise or on a0 and a1",
-      "mnemonic" : "OR"
+      "mnemonic" : "OR",
+      "operation" : "a0 | a1"
     },
     "XOR" : {
       "name" : "Exclusive Or",
       "description" : "Performs bitwise exclusive or on a0 and a1",
-      "mnemonic" : "XOR"
+      "mnemonic" : "XOR",
+      "operation" : "a0 ^ a1"
     },
     "ROT" : {
       "name" : "Rotate",
       "description" : "Performs unsigned left rotation of a0 by a1. If a1 < 0 a0 gets rotated to the right by -a1",
-      "mnemonic" : "ROT"
+      "mnemonic" : "ROT",
+      "operation" : "(a1 > 0) ? a0 << a1 : a0 >> a1"
     }
   },
 

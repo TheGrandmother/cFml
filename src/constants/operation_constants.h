@@ -11,9 +11,9 @@
 
 //These are instruction hints
 //Used to for performance
-#define BINARY_START	0x5ULL
-#define UNARY_START	0x11ULL
-#define CONTROL_START	0x12ULL
+#define BINARY_START	0x4ULL
+#define UNARY_START	0x10ULL
+#define CONTROL_START	0x11ULL
 #define OPERATIONS_END	0x19ULL
 
 //These are the argument counts for the
