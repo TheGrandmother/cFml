@@ -61,7 +61,7 @@ void test_single_push_n_pop(){
   }
 
   
-  fml_word head;
+  fml_word head = 0;
   E4C_TRY{
     head = pop(stack);
   }E4C_CATCH(StackEmptyException){
