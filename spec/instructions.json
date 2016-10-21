@@ -160,6 +160,12 @@
       "mnemonic" : "RET",
       "args" : 0
     },
+    "DIE" : {
+      "name" : "Die",
+      "description" : "Propperly kills the VM. Unrecoverable",
+      "mnemonic" : "DIE",
+      "args" : 0
+    },
     "HLT" : {
       "name" : "Halt",
       "description" : "Halts the VM",
