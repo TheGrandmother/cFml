@@ -1,7 +1,7 @@
-C_FLAGS = -Wall -std=c11 -ggdb -Wno-dangling-else -Werror
+C_FLAGS = -Wall -std=c11 -ggdb -Wno-dangling-else -Werror -D_POSIX_C_SOURCE=200809L
 COMPILER = clang
 
-test: e4c_lite.o eval_test.o stack_test.o stack.o ram.o ram_test.o tests/test_main.c fml_machine.o eval.o
+test: e4c_lite.o eval_test.o stack_test.o stack.o ram.o ram_test.o tests/test_main.c fml_machine.o eval.o debug.o
 	$(COMPILER) $(C_FLAGS)  -L/usr/local/lib  $^ -o ../bin/test -lcunit
 
 eval_test.o: tests/eval_test.c 
@@ -23,6 +23,9 @@ stack.o: stack.c stack.h components.h
 	$(COMPILER) $(C_FLAGS) -c $^
 
 ram.o: ram.c ram.h components.h constants.h types.h 
+	$(COMPILER) $(C_FLAGS) -c $^
+
+debug.o: debug.c debug.h components.h constants.h types.h 
 	$(COMPILER) $(C_FLAGS) -c $^
 
 #This produces an error that i simply just does not understand :p
