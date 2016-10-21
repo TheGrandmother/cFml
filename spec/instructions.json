@@ -65,6 +65,12 @@
       "mnemonic" : "EQL",
       "operation" : "a0 == a1"
     },
+    "NEQ" : {
+      "name" : "Not Equal",
+      "description" : "Returns 1 if a0 and a1 are not equal.",
+      "mnemonic" : "NEQ",
+      "operation" : "a0 != a1"
+    },
     "GRT" : {
       "name" : "Greter than",
       "description" : "Returns 1 if a0 is greater than a1",
