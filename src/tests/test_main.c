@@ -47,8 +47,12 @@ int main(){
      {"Testing MOV 420 $42", test_mov_const_mem},
      {"Testing MOV 420 s", test_mov_const_s},
      {"Testing ADD 20 400", test_add_c_c},
+     {"Testing EQL x 420", test_eql_x_c},
      {"Testing DIV 420 0", test_div_420_0_fail},
      {"Testing MOD 420 0", test_mod_420_0_fail},
+     {"Testing JOO", test_joo},
+     {"Testing JSR", test_jsr},
+     
      CU_TEST_INFO_NULL,
    };
 

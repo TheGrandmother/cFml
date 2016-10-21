@@ -65,6 +65,9 @@ inline char *mne_lookup(fml_word op_index){
 	case(NOT_VALUE):
 		 return "NOT";
 
+	case(DIE_VALUE):
+		 return "DIE";
+
 	case(JOZ_VALUE):
 		 return "JOZ";
 
@@ -149,6 +152,10 @@ inline fml_addr arg_lookup(fml_word op_index){
 
 	case(NOT_VALUE):
 		return 1;
+		break;
+
+	case(DIE_VALUE):
+		return 0;
 		break;
 
 	case(JOZ_VALUE):

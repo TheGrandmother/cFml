@@ -38,9 +38,12 @@ void machine_create_and_destroy(){
   | (A0 << A0_SHIFT)\
   | (A1 << A1_SHIFT)
 
+#define INSTRUCTION_(OP_CODE) (OP_CODE << OPCODE_SHIFT)\
+  | (1 << STEP_SHIFT)
+
 
 void test_inc(){
-  fml_machine *fml = create_machine(100,100,100,100);
+  fml_machine *fml = create_machine(100,10,100,100);
   fml_word inc_instr = (INC_VALUE << OPCODE_SHIFT) | (1 << STEP_SHIFT); //INC s
   fml_word hlt_instruction = (HLT_VALUE << OPCODE_SHIFT); //INC x
   fml->ram->prg_ram[0] = inc_instr;
@@ -53,7 +56,7 @@ void test_inc(){
 }
 
 void test_mov_const_x(){
-  fml_machine *fml = create_machine(100,100,100,100);
+  fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
     INSTRUCTION(MOV_VALUE,2,CONSTANT,REG_X),
     TEST_DEFAULT,                                              // const
@@ -65,7 +68,7 @@ void test_mov_const_x(){
 }
 
 void test_mov_const_mem(){
-  fml_machine *fml = create_machine(100,100,100,100);
+  fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
     INSTRUCTION(MOV_VALUE,3,CONSTANT,ADDR_CONSTANT),
     TEST_DEFAULT,                                              // const 
@@ -82,7 +85,7 @@ void test_mov_const_mem(){
 }
 
 void test_mov_const_s(){
-  fml_machine *fml = create_machine(100,100,100,100);
+  fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
     INSTRUCTION(MOV_VALUE,2,CONSTANT,ACC_STACK),
     TEST_DEFAULT,                                              // const 
@@ -97,7 +100,7 @@ void test_mov_const_s(){
 }
 
 void test_add_c_c(){
-  fml_machine *fml = create_machine(100,100,100,100);
+  fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
     INSTRUCTION(ADD_VALUE,3,CONSTANT,CONSTANT),
     20,                                              // const 
@@ -112,8 +115,26 @@ void test_add_c_c(){
   destroy_machine(fml);
 }
 
+void test_eql_x_c(){
+  fml_machine *fml = create_machine(100,10,100,100);
+  fml_word program[10] ={
+    INSTRUCTION(MOV_VALUE,2,CONSTANT,REG_X),
+    TEST_DEFAULT,                                              // const 
+    INSTRUCTION(EQL_VALUE,2,CONSTANT,REG_X),
+    TEST_DEFAULT,
+    (HLT_VALUE << OPCODE_SHIFT)                       // HLT
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
+
+  CU_ASSERT_EQUAL(eval(fml,5),0);
+  CU_ASSERT_EQUAL(peep(fml->s), 1);
+
+  destroy_machine(fml);
+}
+
+
 void test_div_420_0_fail(){
-  fml_machine *fml = create_machine(100,100,100,100);
+  fml_machine *fml = create_machine(100,10,100,100);
 
   fml_word program[10] ={
     INSTRUCTION(DIV_VALUE,3,CONSTANT,CONSTANT),
@@ -135,7 +156,7 @@ void test_div_420_0_fail(){
 }
 
 void test_mod_420_0_fail(){
-  fml_machine *fml = create_machine(100,100,100,100);
+  fml_machine *fml = create_machine(100,10,100,100);
 
   fml_word program[10] ={
     INSTRUCTION(MOD_VALUE,3,CONSTANT,CONSTANT),
@@ -159,5 +180,55 @@ void test_mod_420_0_fail(){
   destroy_machine(fml);
 }
 
+void test_joo(){
+  fml_machine *fml = create_machine(100,10,100,100);
+  fml_word program[10] ={
+    INSTRUCTION(EQL_VALUE, 3, CONSTANT, CONSTANT),
+    420,
+    420,
+    INSTRUCTION(JOO_VALUE, 2, CONSTANT, REG_X),
+    6,
+    INSTRUCTION_(DIE_VALUE),
+    INSTRUCTION_(HLT_VALUE)
 
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
+
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+
+  destroy_machine(fml);
+}
+void test_jsr(){
+  fml_machine *fml = create_machine(100,15,100,100);
+  fml_word program[15] ={
+    /*0*/  INSTRUCTION(MOV_VALUE, 2, CONSTANT, REG_X),
+    /*1*/  400,
+    /*2*/  INSTRUCTION(JSR_VALUE, 2, CONSTANT, REG_X),
+    /*3*/  11,
+    /*4*/  INSTRUCTION(ADD_VALUE, 1, REG_Y, REG_X),
+    /*5*/  INSTRUCTION(EQL_VALUE, 2, ACC_STACK, CONSTANT),
+    /*6*/  420,
+    /*7*/  INSTRUCTION(JOO_VALUE, 2, CONSTANT, REG_X),
+    /*8*/  10,
+    /*9*/  INSTRUCTION_(DIE_VALUE),
+    /*10*/ INSTRUCTION_(HLT_VALUE),
+    /*11*/ INSTRUCTION(MOV_VALUE, 2, CONSTANT, REG_Y),
+    /*12*/ 20,
+    /*13*/ INSTRUCTION_(RET_VALUE)
+
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*15);
+
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+
+  destroy_machine(fml);
+}
 

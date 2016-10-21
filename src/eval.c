@@ -6,12 +6,21 @@
 #include "components.h"
 #include "stack.h"
 #include "ram.h"
+#include "debug.h"
+
+
 #include <stdio.h>
+
+
 E4C_DEFINE_EXCEPTION(FmlException, "General FML exception", RuntimeException);
 E4C_DEFINE_EXCEPTION(NotImplementedException, "Instruction Not Implemented", FmlException);
+E4C_DEFINE_EXCEPTION(EmptyJumpStackException, "The jump stack is empty", FmlException);
+E4C_DEFINE_EXCEPTION(SuicideException, "The VM is no more", FmlException);
+
 E4C_DEFINE_EXCEPTION(ArithmeticException, "General Arithmetic exception", FmlException);
 E4C_DEFINE_EXCEPTION(DivByZeroException, "Div by 0 exception", ArithmeticException);
 E4C_DEFINE_EXCEPTION(ModByZeroException, "Mod by 0 exception", ArithmeticException);
+
 E4C_DEFINE_EXCEPTION(InstructionException, "General Instruction Exception", FmlException);
 E4C_DEFINE_EXCEPTION(MoveToConstantException, "Move To Constant Exception", InstructionException);
 E4C_DEFINE_EXCEPTION(InvalidOperationException, "Invalid Operation", InstructionException);
@@ -86,25 +95,24 @@ int eval(fml_machine *self, uint64_t max_steps){
   while(!self->halt){
     puts("");
     printf("Evaluating at 0x%lx\n",self->pc);
+
     fml_word instruction = self->ram->prg_ram[self->pc];
-    printf("Current instruction is 0x%lX\n",instruction);
+    print_prog(self->ram, self->pc);
 
     fml_addr step_length = (instruction & STEP_MASK) >> STEP_SHIFT;
 
     if(instruction != NOP){
       fml_word op_index = (instruction & OPCODE_MASK) >> OPCODE_SHIFT;
-      printf("Op index is\t 0x%lx\n",op_index);
-      printf("Step len is\t 0x%lx\n",step_length);
-      printf("Arg_0 is\t 0x%LX. Arg_1 is 0x%LX\n",
-          (instruction & A0_MASK) >> A0_SHIFT,
-          (instruction & A1_MASK) >> A1_SHIFT
-          );
 
       if(op_index >= OPERATIONS_END){
         fprintf(stderr,"Operation out of bounds: %lu(%lX)\n",op_index,op_index);
         E4C_THROW(InvalidOperationException,NULL);
         return 1;
       }
+      
+      //Compute offs
+      fml_addr a1_offs = A0_OFFS + 
+        ((((instruction & A0_MASK) >> A0_SHIFT) & LOCATION_MASK) == CONSTANT  ?1 : 0);
 
       if(op_index < CONTROL_START){
         if(op_index < BINARY_START){
@@ -120,14 +128,14 @@ int eval(fml_machine *self, uint64_t max_steps){
                 write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val - 1);
                 break;
               case(MOV_VALUE):
-                write_argument((instruction & A1_MASK) >> A1_SHIFT, self, A1_OFFS, val);
+                write_argument((instruction & A1_MASK) >> A1_SHIFT, self, a1_offs, val);
                 break;
             }
         
         }else if(op_index < UNARY_START){
           //Binary Operations
           fml_word a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
-          fml_word a1 = read_argument((instruction & A1_MASK) >> A1_SHIFT, self, A1_OFFS);
+          fml_word a1 = read_argument((instruction & A1_MASK) >> A1_SHIFT, self, a1_offs);
           push(self->s,eval_binop(op_index, a0, a1));
         }else{
           //Unary Operators
@@ -140,10 +148,41 @@ int eval(fml_machine *self, uint64_t max_steps){
         //Control operations. 
         //They dont handle the PC like normal people
         switch(op_index){
+          fml_word a0;
+          case(JOO_VALUE):
+            a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+            if(pop(self->s) == 1){
+              self->pc = a0;
+            }else{
+              self->pc += step_length;
+            }
+            break;
+
+          case(JSR_VALUE):
+            a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+            push(self->js,self->pc+step_length);
+            self->pc = a0;
+            break;
+
+          case(RET_VALUE):
+            E4C_TRY{
+            self->pc = pop(self->js);
+            }E4C_CATCH(StackEmptyException){
+              fprintf(stderr,"Jump stack is empty.\n");
+              E4C_THROW(EmptyJumpStackException, NULL);
+            
+            }
+            break;
+
           case(HLT_VALUE):
-            puts("Executing halt");
             self->halt = 1;
             break;
+
+          case(DIE_VALUE):
+            E4C_THROW(SuicideException,NULL);
+            self->halt = 1;
+            break;
+
           default:
             fprintf(stderr,"Not implemented");
             E4C_THROW(NotImplementedException,NULL);
@@ -155,7 +194,7 @@ int eval(fml_machine *self, uint64_t max_steps){
       self->pc++;
     }
     if(steps != max_steps){
-    steps++;
+      steps++;
     }else{
       fprintf(stderr, "Exceeding maximum steps.\n");
       return 2;
