@@ -61,16 +61,13 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
     //We get the address as we should have gotten a normal argument.
     fml_addr addr = read_argument(arg & LOCATION_MASK, self, offs);
     addr += (arg & SP_MASK) != 0 ? self->sp : 0;  
-    printf("wiriting to address 0x%lX\n",addr);
     write(self->ram,addr,val);
   }else{
     switch(arg & LOCATION_MASK){
       case REG_X:
-        printf("Writing 0x%lx to x\n",val);
         self->x = val;
         break;
       case REG_Y:
-        printf("Writing 0x%lx to y\n",val);
         self->y = val;
         break;
       case CONSTANT:
@@ -78,7 +75,6 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
         E4C_THROW(MoveToConstantException, NULL);
         break;
       case ACC_STACK:
-        printf("Writing 0x%lx to s\n",val);
         push(self->s,val);
         break;
       default:
@@ -86,6 +82,103 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
         E4C_THROW(FmlException,NULL);
         break;
     }
+  }
+}
+
+extern inline void eval_control(fml_machine *self, fml_word op_index, fml_word instruction, fml_addr step_length, fml_addr a1_offs){
+  switch(op_index){
+    fml_word a0;
+    case(JMP_VALUE):
+      a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+      self->pc = a0;
+      break;
+
+    case(JOO_VALUE):
+      a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+      if(pop(self->s) == 1){
+        self->pc = a0;
+      }else{
+        self->pc += step_length;
+      }
+      break;
+
+    case(JOZ_VALUE):
+      a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+      if(pop(self->s) == 0){
+        self->pc = a0;
+      }else{
+        self->pc += step_length;
+      }
+      break;
+
+    case(SOO_VALUE):
+      if(pop(self->s) == 1){
+        goto exec_jsr;
+      }else{
+        self->pc += step_length;
+      }
+      break;
+
+    case(SOZ_VALUE):
+      if(pop(self->s) == 0){
+        goto exec_jsr;
+      }else{
+        self->pc += step_length;
+      }
+      break;
+
+    case(JSR_VALUE):
+exec_jsr:
+      a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+      push(self->js,self->pc+step_length);
+      self->pc = a0;
+      break;
+
+    case(RET_VALUE):
+      E4C_TRY{
+        self->pc = pop(self->js);
+      }E4C_CATCH(StackEmptyException){
+        fprintf(stderr,"Jump stack is empty.\n");
+        E4C_THROW(EmptyJumpStackException, NULL);
+
+      }
+      break;
+
+    case(HLT_VALUE):
+      self->halt = 1;
+      break;
+
+    case(DIE_VALUE):
+      E4C_THROW(SuicideException,NULL);
+      self->halt = 1;
+      break;
+
+    default:
+      fprintf(stderr,"Not implemented");
+      E4C_THROW(NotImplementedException,NULL);
+      break;
+  }
+
+}
+
+extern inline void eval_special(fml_machine *self, fml_word op_index, fml_word instruction, fml_addr step_length, fml_addr a1_offs){
+  fml_word val = 0;
+  val = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+
+  switch(op_index){
+    case(INC_VALUE):
+      write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val + 1);
+      break;
+    case(DEC_VALUE):
+      write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val - 1);
+      break;
+    case(MOV_VALUE):
+      write_argument((instruction & A1_MASK) >> A1_SHIFT, self, a1_offs, val);
+      break;
+    default:
+      fprintf(stderr,"No such special Operation.");
+      E4C_THROW(InstructionException,NULL);
+      break;
   }
 }
 
@@ -112,83 +205,28 @@ int eval(fml_machine *self, uint64_t max_steps){
       
       //Compute offs
       fml_addr a1_offs = A0_OFFS + 
-        ((((instruction & A0_MASK) >> A0_SHIFT) & LOCATION_MASK) == CONSTANT  ?1 : 0);
+        ((((instruction & A0_MASK) >> A0_SHIFT) & LOCATION_MASK) == CONSTANT  ? 1 : 0);
 
       if(op_index < CONTROL_START){
         if(op_index < BINARY_START){
           //Special Operations
-            fml_word val = 0;
-            val = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
-            printf("Read value 0x%lx(%lu)\n",val,val);
-            switch(op_index){
-              case(INC_VALUE):
-                write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val + 1);
-                break;
-              case(DEC_VALUE):
-                write_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS, val - 1);
-                break;
-              case(MOV_VALUE):
-                write_argument((instruction & A1_MASK) >> A1_SHIFT, self, a1_offs, val);
-                break;
-            }
+          eval_special(self, op_index, instruction, step_length, a1_offs);
         
         }else if(op_index < UNARY_START){
-          //Binary Operations
           fml_word a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
           fml_word a1 = read_argument((instruction & A1_MASK) >> A1_SHIFT, self, a1_offs);
           push(self->s,eval_binop(op_index, a0, a1));
+
         }else{
-          //Unary Operators
-          fprintf(stderr,"Not implemented");
+          fprintf(stderr,"Unary operations not implemented");
           E4C_THROW(NotImplementedException,NULL);
         }
+
         self->pc += step_length;
 
       }else{
         //Control operations. 
-        //They dont handle the PC like normal people
-        switch(op_index){
-          fml_word a0;
-          case(JOO_VALUE):
-            a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
-            if(pop(self->s) == 1){
-              self->pc = a0;
-            }else{
-              self->pc += step_length;
-            }
-            break;
-
-          case(JSR_VALUE):
-            a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
-            push(self->js,self->pc+step_length);
-            self->pc = a0;
-            break;
-
-          case(RET_VALUE):
-            E4C_TRY{
-            self->pc = pop(self->js);
-            }E4C_CATCH(StackEmptyException){
-              fprintf(stderr,"Jump stack is empty.\n");
-              E4C_THROW(EmptyJumpStackException, NULL);
-            
-            }
-            break;
-
-          case(HLT_VALUE):
-            self->halt = 1;
-            break;
-
-          case(DIE_VALUE):
-            E4C_THROW(SuicideException,NULL);
-            self->halt = 1;
-            break;
-
-          default:
-            fprintf(stderr,"Not implemented");
-            E4C_THROW(NotImplementedException,NULL);
-            break;
-        }
-      
+        eval_control(self, op_index, instruction, step_length, a1_offs);
       }
     }else{
       self->pc++;
