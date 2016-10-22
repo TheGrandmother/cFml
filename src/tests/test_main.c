@@ -6,6 +6,7 @@
 #include "eval_test.h"
 
 
+#define OLD_CUNIT
 #ifdef OLD_CUNIT
 #define TEST_SUITE(NAME, SUITE_NAME) {NAME, init_suite, clean_suite, SUITE_NAME},
 #else
@@ -40,26 +41,41 @@ int main(){
      CU_TEST_INFO_NULL,
    };
 
-   CU_TestInfo eval_tests[] = {
+   CU_TestInfo control_ops[] = {
+     {"Testing JOO", test_joo},
+     {"Testing JOZ", test_joz},
+     {"Testing SOO", test_soo},
+     {"Testing SOZ", test_soz},
+     {"Testing JMP", test_jmp},
+     {"Testing JSR", test_jsr},
+     {"Testing nested JSR", test_nested_jsr},
+     {"Testing empty jump stack", test_empty_jump_stack},
+     CU_TEST_INFO_NULL,
+   };
+
+   CU_TestInfo special_ops[] = {
      {"Testing build and destroy.", machine_create_and_destroy},
      {"Testing INC x", test_inc},
      {"Testing MOV 420 x", test_mov_const_x},
      {"Testing MOV 420 $42", test_mov_const_mem},
      {"Testing MOV 420 s", test_mov_const_s},
+     CU_TEST_INFO_NULL,
+   };
+
+   CU_TestInfo binary_ops[] = {
      {"Testing ADD 20 400", test_add_c_c},
      {"Testing EQL x 420", test_eql_x_c},
      {"Testing DIV 420 0", test_div_420_0_fail},
      {"Testing MOD 420 0", test_mod_420_0_fail},
-     {"Testing JOO", test_joo},
-     {"Testing JSR", test_jsr},
-     
      CU_TEST_INFO_NULL,
    };
 
    CU_SuiteInfo suites[] = {
      TEST_SUITE("Testing Stack", stack_tests)
      TEST_SUITE("Testing Ram"  , ram_tests)
-     TEST_SUITE("Testing Eval" , eval_tests) 
+     TEST_SUITE("Testing Special Instructions" , special_ops) 
+     TEST_SUITE("Testing Bianry Operations" , binary_ops) 
+     TEST_SUITE("Testing Control Instructioins" , control_ops) 
      CU_SUITE_INFO_NULL,
    };
 

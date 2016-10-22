@@ -26,6 +26,12 @@ void test_eql_x_c();
 void test_div_420_0_fail();
 void test_mod_420_0_fail();
 void test_joo();
+void test_joz();
+void test_soo();
+void test_soz();
+void test_jmp();
 void test_jsr();
+void test_nested_jsr();
+void test_empty_jump_stack();
 
 #endif

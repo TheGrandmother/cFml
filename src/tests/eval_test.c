@@ -23,6 +23,8 @@ void machine_create_and_destroy(){
 
 #define TEST_DEFAULT 420
 
+#define NO_ARG 0
+
 #define ADDR_REG_X (ADDRESS_MASK | REG_X) 
 #define ADDR_REG_Y (ADDRESS_MASK | REG_Y) 
 #define ADDR_CONSTANT (ADDRESS_MASK | CONSTANT) 
@@ -193,15 +195,51 @@ void test_joo(){
 
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
-
   E4C_TRY{
     CU_ASSERT_EQUAL(eval(fml,1000),0);
   }E4C_CATCH(SuicideException){
     CU_FAIL("Program threw Suicide :'(\n");
   }
-
   destroy_machine(fml);
 }
+
+void test_joz(){
+  fml_machine *fml = create_machine(100,10,100,100);
+  fml_word program[10] ={
+    INSTRUCTION(EQL_VALUE, 3, CONSTANT, CONSTANT),
+    400,
+    420,
+    INSTRUCTION(JOZ_VALUE, 2, CONSTANT, REG_X),
+    6,
+    INSTRUCTION_(DIE_VALUE),
+    INSTRUCTION_(HLT_VALUE)
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+  destroy_machine(fml);
+}
+
+void test_jmp(){
+  fml_machine *fml = create_machine(100,10,100,100);
+  fml_word program[10] ={
+    INSTRUCTION(JMP_VALUE, 2, CONSTANT, REG_X),
+    3,
+    INSTRUCTION_(DIE_VALUE),
+    INSTRUCTION_(HLT_VALUE)
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+  destroy_machine(fml);
+}
+
 void test_jsr(){
   fml_machine *fml = create_machine(100,15,100,100);
   fml_word program[15] ={
@@ -228,7 +266,97 @@ void test_jsr(){
   }E4C_CATCH(SuicideException){
     CU_FAIL("Program threw Suicide :'(\n");
   }
-
   destroy_machine(fml);
 }
 
+void test_nested_jsr(){
+  fml_machine *fml = create_machine(100,15,100,100);
+  fml_word program[15] ={
+    /*0*/ INSTRUCTION(JSR_VALUE, 2, CONSTANT, NO_ARG),
+    /*1*/ 7,
+    /*2*/ INSTRUCTION(EQL_VALUE, 1, REG_X, REG_Y),
+    /*3*/ INSTRUCTION(JOZ_VALUE, 2, CONSTANT, NO_ARG),
+    /*4*/ 6,
+    /*5*/ INSTRUCTION_(HLT_VALUE),
+    /*6*/ INSTRUCTION_(DIE_VALUE),
+    /*7*/ INSTRUCTION(INC_VALUE, 1, REG_Y, NO_ARG), //Bar
+    /*8*/ INSTRUCTION(JSR_VALUE, 2, CONSTANT, NO_ARG),
+    /*9*/ 11,
+    /*10*/ INSTRUCTION_(RET_VALUE),
+    /*11*/ INSTRUCTION(INC_VALUE, 1,REG_X, NO_ARG), //foo
+    /*12*/ INSTRUCTION_(RET_VALUE)
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*15);
+
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+  destroy_machine(fml);
+}
+
+void test_empty_jump_stack(){
+  fml_machine *fml = create_machine(100,10,100,100);
+  fml_word program[10] ={
+    INSTRUCTION_(RET_VALUE),
+    INSTRUCTION_(DIE_VALUE),
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }E4C_CATCH(EmptyJumpStackException){
+    CU_PASS();
+  }
+  destroy_machine(fml);
+}
+
+void test_soo(){
+  fml_machine *fml = create_machine(100,15,100,100);
+  fml_word program[15] ={
+    INSTRUCTION(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    1,
+    INSTRUCTION(SOO_VALUE, 2, CONSTANT, NO_ARG),
+    8,
+    INSTRUCTION(JOO_VALUE, 2, CONSTANT, NO_ARG),
+    7,
+    INSTRUCTION_(DIE_VALUE),
+    INSTRUCTION_(HLT_VALUE),
+    INSTRUCTION(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    1,
+    INSTRUCTION_(RET_VALUE)
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*15);
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+  destroy_machine(fml);
+}
+
+void test_soz(){
+  fml_machine *fml = create_machine(100,15,100,100);
+  fml_word program[15] ={
+    INSTRUCTION(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    0,
+    INSTRUCTION(SOZ_VALUE, 2, CONSTANT, NO_ARG),
+    8,
+    INSTRUCTION(JOO_VALUE, 2, CONSTANT, NO_ARG),
+    7,
+    INSTRUCTION_(DIE_VALUE),
+    INSTRUCTION_(HLT_VALUE),
+    INSTRUCTION(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    1,
+    INSTRUCTION_(RET_VALUE)
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*15);
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+  destroy_machine(fml);
+}
