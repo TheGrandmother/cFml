@@ -109,7 +109,7 @@ void print_prog(fml_ram *ram, fml_addr pc){
     i += ((ram->prg_ram[i] & STEP_MASK) == 0) ? 1 : (ram->prg_ram[i] & STEP_MASK) >> STEP_SHIFT;
   }
 
-  printf("%s\n",buf);
+  printf("%s",buf);
   free(buf);
 }
 
