@@ -1,6 +1,8 @@
 #c files
 *.o
 *.gch
+*.gcda
+*.gcno
 bin/
 
 #vim files
