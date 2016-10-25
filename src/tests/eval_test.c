@@ -29,18 +29,23 @@ void machine_create_and_destroy(){
 #define ADDR_REG_Y (ADDRESS_MASK | REG_Y) 
 #define ADDR_CONSTANT (ADDRESS_MASK | CONSTANT) 
 #define ADDR_STACK (ADDRESS_MASK | ACC_STACK) 
+#define ADDR_SP (ADDRESS_MASK | SP) 
 
 #define SP_REG_X (SP_MASK | REG_X) 
 #define SP_REG_Y (SP_MASK | REG_Y) 
 #define SP_CONSTANT (SP_MASK | CONSTANT) 
-#define SP_STACK (SP_MASK | ACC_STACK) 
+#define SP_STACK (SP_MASK | SP) 
 
-#define INSTRUCTION(OP_CODE, STEP,A0,A1) (OP_CODE << OPCODE_SHIFT)\
+#define INST_3(OP_CODE, STEP,A0,A1) (OP_CODE << OPCODE_SHIFT)\
   | (STEP << STEP_SHIFT)\
   | (A0 << A0_SHIFT)\
   | (A1 << A1_SHIFT)
 
-#define INSTRUCTION_(OP_CODE) (OP_CODE << OPCODE_SHIFT)\
+#define INST_2(OP_CODE, STEP,A0) (OP_CODE << OPCODE_SHIFT)\
+  | (STEP << STEP_SHIFT)\
+  | (A0 << A0_SHIFT)
+
+#define INST_1(OP_CODE) (OP_CODE << OPCODE_SHIFT)\
   | (1 << STEP_SHIFT)
 
 
@@ -60,19 +65,63 @@ void test_inc(){
 void test_mov_const_x(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION(MOV_VALUE,2,CONSTANT,REG_X),
+    INST_3(MOV_VALUE,2,CONSTANT,REG_X),
     TEST_DEFAULT,                                              // const
     (HLT_VALUE << OPCODE_SHIFT)                       // HLT
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
   CU_ASSERT_EQUAL(eval(fml,2),0);
+  CU_ASSERT_EQUAL(fml->x,TEST_DEFAULT);
+  destroy_machine(fml);
+}
+
+void test_mov_const_sp(){
+  fml_machine *fml = create_machine(100,10,100,100);
+  fml_word program[10] ={
+    INST_3(MOV_VALUE,2,CONSTANT,SP),
+    TEST_DEFAULT,                                              // const
+    (HLT_VALUE << OPCODE_SHIFT)                       // HLT
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
+  CU_ASSERT_EQUAL(eval(fml,2),0);
+  CU_ASSERT_EQUAL(fml->sp,TEST_DEFAULT);
+  destroy_machine(fml);
+}
+
+void test_mov_sp_x(){
+  fml_machine *fml = create_machine(100,10,100,100);
+  fml_word program[10] ={
+    INST_3(MOV_VALUE,2,CONSTANT,SP),
+    TEST_DEFAULT,
+    INST_3(MOV_VALUE,1,SP,REG_X),
+    (HLT_VALUE << OPCODE_SHIFT)                       // HLT
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
+  CU_ASSERT_EQUAL(eval(fml,20),0);
+  CU_ASSERT_EQUAL(fml->x,TEST_DEFAULT);
+  destroy_machine(fml);
+}
+
+void test_mov_addr_sp_x(){
+  fml_machine *fml = create_machine(100,10,100,100);
+  fml_word program[10] ={
+    INST_3(MOV_VALUE,2, CONSTANT, SP),
+    5,
+    INST_3(MOV_VALUE,2,CONSTANT, ADDR_SP),
+    420,
+    INST_3(MOV_VALUE,1,ADDR_SP,REG_X),
+    (HLT_VALUE << OPCODE_SHIFT)                       // HLT
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
+  CU_ASSERT_EQUAL(eval(fml,100),0);
+  CU_ASSERT_EQUAL(fml->x,TEST_DEFAULT);
   destroy_machine(fml);
 }
 
 void test_mov_const_mem(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION(MOV_VALUE,3,CONSTANT,ADDR_CONSTANT),
+    INST_3(MOV_VALUE,3,CONSTANT,ADDR_CONSTANT),
     TEST_DEFAULT,                                              // const 
     42,                                               // const
     (HLT_VALUE << OPCODE_SHIFT)                       // HLT
@@ -89,7 +138,7 @@ void test_mov_const_mem(){
 void test_mov_const_s(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION(MOV_VALUE,2,CONSTANT,ACC_STACK),
+    INST_3(MOV_VALUE,2,CONSTANT,ACC_STACK),
     TEST_DEFAULT,                                              // const 
     (HLT_VALUE << OPCODE_SHIFT)                       // HLT
   };
@@ -104,7 +153,7 @@ void test_mov_const_s(){
 void test_add_c_c(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION(ADD_VALUE,3,CONSTANT,CONSTANT),
+    INST_3(ADD_VALUE,3,CONSTANT,CONSTANT),
     20,                                              // const 
     400,                                              // const 
     (HLT_VALUE << OPCODE_SHIFT)                       // HLT
@@ -120,9 +169,9 @@ void test_add_c_c(){
 void test_eql_x_c(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION(MOV_VALUE,2,CONSTANT,REG_X),
+    INST_3(MOV_VALUE,2,CONSTANT,REG_X),
     TEST_DEFAULT,                                              // const 
-    INSTRUCTION(EQL_VALUE,2,CONSTANT,REG_X),
+    INST_3(EQL_VALUE,2,CONSTANT,REG_X),
     TEST_DEFAULT,
     (HLT_VALUE << OPCODE_SHIFT)                       // HLT
   };
@@ -139,7 +188,7 @@ void test_div_420_0_fail(){
   fml_machine *fml = create_machine(100,10,100,100);
 
   fml_word program[10] ={
-    INSTRUCTION(DIV_VALUE,3,CONSTANT,CONSTANT),
+    INST_3(DIV_VALUE,3,CONSTANT,CONSTANT),
     420,                                              // const 
     0,                                              // const 
     (HLT_VALUE << OPCODE_SHIFT)                       // HLT
@@ -161,7 +210,7 @@ void test_mod_420_0_fail(){
   fml_machine *fml = create_machine(100,10,100,100);
 
   fml_word program[10] ={
-    INSTRUCTION(MOD_VALUE,3,CONSTANT,CONSTANT),
+    INST_3(MOD_VALUE,3,CONSTANT,CONSTANT),
     420,                                              // const 
     0,                                                // const 
     (HLT_VALUE << OPCODE_SHIFT)                       // HLT
@@ -185,13 +234,13 @@ void test_mod_420_0_fail(){
 void test_joo(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION(EQL_VALUE, 3, CONSTANT, CONSTANT),
+    INST_3(EQL_VALUE, 3, CONSTANT, CONSTANT),
     420,
     420,
-    INSTRUCTION(JOO_VALUE, 2, CONSTANT, REG_X),
+    INST_3(JOO_VALUE, 2, CONSTANT, REG_X),
     6,
-    INSTRUCTION_(DIE_VALUE),
-    INSTRUCTION_(HLT_VALUE)
+    INST_1(DIE_VALUE),
+    INST_1(HLT_VALUE)
 
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
@@ -206,13 +255,13 @@ void test_joo(){
 void test_joz(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION(EQL_VALUE, 3, CONSTANT, CONSTANT),
+    INST_3(EQL_VALUE, 3, CONSTANT, CONSTANT),
     400,
     420,
-    INSTRUCTION(JOZ_VALUE, 2, CONSTANT, REG_X),
+    INST_3(JOZ_VALUE, 2, CONSTANT, REG_X),
     6,
-    INSTRUCTION_(DIE_VALUE),
-    INSTRUCTION_(HLT_VALUE)
+    INST_1(DIE_VALUE),
+    INST_1(HLT_VALUE)
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
   E4C_TRY{
@@ -226,10 +275,10 @@ void test_joz(){
 void test_jmp(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION(JMP_VALUE, 2, CONSTANT, REG_X),
+    INST_3(JMP_VALUE, 2, CONSTANT, REG_X),
     3,
-    INSTRUCTION_(DIE_VALUE),
-    INSTRUCTION_(HLT_VALUE)
+    INST_1(DIE_VALUE),
+    INST_1(HLT_VALUE)
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
   E4C_TRY{
@@ -243,20 +292,20 @@ void test_jmp(){
 void test_jsr(){
   fml_machine *fml = create_machine(100,15,100,100);
   fml_word program[15] ={
-    /*0*/  INSTRUCTION(MOV_VALUE, 2, CONSTANT, REG_X),
+    /*0*/  INST_3(MOV_VALUE, 2, CONSTANT, REG_X),
     /*1*/  400,
-    /*2*/  INSTRUCTION(JSR_VALUE, 2, CONSTANT, REG_X),
+    /*2*/  INST_3(JSR_VALUE, 2, CONSTANT, REG_X),
     /*3*/  11,
-    /*4*/  INSTRUCTION(ADD_VALUE, 1, REG_Y, REG_X),
-    /*5*/  INSTRUCTION(EQL_VALUE, 2, ACC_STACK, CONSTANT),
+    /*4*/  INST_3(ADD_VALUE, 1, REG_Y, REG_X),
+    /*5*/  INST_3(EQL_VALUE, 2, ACC_STACK, CONSTANT),
     /*6*/  420,
-    /*7*/  INSTRUCTION(JOO_VALUE, 2, CONSTANT, REG_X),
+    /*7*/  INST_3(JOO_VALUE, 2, CONSTANT, REG_X),
     /*8*/  10,
-    /*9*/  INSTRUCTION_(DIE_VALUE),
-    /*10*/ INSTRUCTION_(HLT_VALUE),
-    /*11*/ INSTRUCTION(MOV_VALUE, 2, CONSTANT, REG_Y),
+    /*9*/  INST_1(DIE_VALUE),
+    /*10*/ INST_1(HLT_VALUE),
+    /*11*/ INST_3(MOV_VALUE, 2, CONSTANT, REG_Y),
     /*12*/ 20,
-    /*13*/ INSTRUCTION_(RET_VALUE)
+    /*13*/ INST_1(RET_VALUE)
 
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*15);
@@ -272,19 +321,19 @@ void test_jsr(){
 void test_nested_jsr(){
   fml_machine *fml = create_machine(100,15,100,100);
   fml_word program[15] ={
-    /*0*/ INSTRUCTION(JSR_VALUE, 2, CONSTANT, NO_ARG),
+    /*0*/ INST_3(JSR_VALUE, 2, CONSTANT, NO_ARG),
     /*1*/ 7,
-    /*2*/ INSTRUCTION(EQL_VALUE, 1, REG_X, REG_Y),
-    /*3*/ INSTRUCTION(JOZ_VALUE, 2, CONSTANT, NO_ARG),
+    /*2*/ INST_3(EQL_VALUE, 1, REG_X, REG_Y),
+    /*3*/ INST_3(JOZ_VALUE, 2, CONSTANT, NO_ARG),
     /*4*/ 6,
-    /*5*/ INSTRUCTION_(HLT_VALUE),
-    /*6*/ INSTRUCTION_(DIE_VALUE),
-    /*7*/ INSTRUCTION(INC_VALUE, 1, REG_Y, NO_ARG), //Bar
-    /*8*/ INSTRUCTION(JSR_VALUE, 2, CONSTANT, NO_ARG),
+    /*5*/ INST_1(HLT_VALUE),
+    /*6*/ INST_1(DIE_VALUE),
+    /*7*/ INST_3(INC_VALUE, 1, REG_Y, NO_ARG), //Bar
+    /*8*/ INST_3(JSR_VALUE, 2, CONSTANT, NO_ARG),
     /*9*/ 11,
-    /*10*/ INSTRUCTION_(RET_VALUE),
-    /*11*/ INSTRUCTION(INC_VALUE, 1,REG_X, NO_ARG), //foo
-    /*12*/ INSTRUCTION_(RET_VALUE)
+    /*10*/ INST_1(RET_VALUE),
+    /*11*/ INST_3(INC_VALUE, 1,REG_X, NO_ARG), //foo
+    /*12*/ INST_1(RET_VALUE)
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*15);
 
@@ -299,8 +348,8 @@ void test_nested_jsr(){
 void test_empty_jump_stack(){
   fml_machine *fml = create_machine(100,10,100,100);
   fml_word program[10] ={
-    INSTRUCTION_(RET_VALUE),
-    INSTRUCTION_(DIE_VALUE),
+    INST_1(RET_VALUE),
+    INST_1(DIE_VALUE),
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*10);
   E4C_TRY{
@@ -316,17 +365,17 @@ void test_empty_jump_stack(){
 void test_soo(){
   fml_machine *fml = create_machine(100,15,100,100);
   fml_word program[15] ={
-    INSTRUCTION(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    INST_3(MOV_VALUE, 2, CONSTANT, ACC_STACK),
     1,
-    INSTRUCTION(SOO_VALUE, 2, CONSTANT, NO_ARG),
+    INST_3(SOO_VALUE, 2, CONSTANT, NO_ARG),
     8,
-    INSTRUCTION(JOO_VALUE, 2, CONSTANT, NO_ARG),
+    INST_3(JOO_VALUE, 2, CONSTANT, NO_ARG),
     7,
-    INSTRUCTION_(DIE_VALUE),
-    INSTRUCTION_(HLT_VALUE),
-    INSTRUCTION(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    INST_1(DIE_VALUE),
+    INST_1(HLT_VALUE),
+    INST_3(MOV_VALUE, 2, CONSTANT, ACC_STACK),
     1,
-    INSTRUCTION_(RET_VALUE)
+    INST_1(RET_VALUE)
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*15);
   E4C_TRY{
@@ -340,17 +389,17 @@ void test_soo(){
 void test_soz(){
   fml_machine *fml = create_machine(100,15,100,100);
   fml_word program[15] ={
-    INSTRUCTION(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    INST_3(MOV_VALUE, 2, CONSTANT, ACC_STACK),
     0,
-    INSTRUCTION(SOZ_VALUE, 2, CONSTANT, NO_ARG),
+    INST_3(SOZ_VALUE, 2, CONSTANT, NO_ARG),
     8,
-    INSTRUCTION(JOO_VALUE, 2, CONSTANT, NO_ARG),
+    INST_3(JOO_VALUE, 2, CONSTANT, NO_ARG),
     7,
-    INSTRUCTION_(DIE_VALUE),
-    INSTRUCTION_(HLT_VALUE),
-    INSTRUCTION(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    INST_1(DIE_VALUE),
+    INST_1(HLT_VALUE),
+    INST_3(MOV_VALUE, 2, CONSTANT, ACC_STACK),
     1,
-    INSTRUCTION_(RET_VALUE)
+    INST_1(RET_VALUE)
   };
   memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*15);
   E4C_TRY{
@@ -360,3 +409,55 @@ void test_soz(){
   }
   destroy_machine(fml);
 }
+
+void test_fib(){
+  fml_machine *fml = create_machine(100,35,10,10);
+  fml_word program[35] ={
+    /*0*/ INST_3(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    /*1*/ 10,
+    /*2*/ INST_2(JSR_VALUE,2,CONSTANT),
+    /*3*/ 5,
+    /*4*/ INST_1(HLT_VALUE),
+
+    /*5*/ INST_2(INC_VALUE,1,SP), //FIB BEGINS HERE
+    /*6*/ INST_3(MOV_VALUE,1,ACC_STACK, ADDR_SP),
+    /*7*/ INST_3(EQL_VALUE,2,CONSTANT,ADDR_SP),
+    /*8*/ 0,
+    /*9*/ INST_2(JOZ_VALUE,2,CONSTANT),
+    /*10*/ 15,
+    /*11*/ INST_3(MOV_VALUE,2,CONSTANT,ACC_STACK),
+    /*12*/ 0,
+    /*13*/ INST_2(DEC_VALUE,1,SP),
+    /*14*/ INST_1(RET_VALUE),
+
+    /*15*/ INST_3(EQL_VALUE,2,CONSTANT, ADDR_SP),// CASE_1
+    /*16*/ 1,
+    /*17*/ INST_2(JOZ_VALUE,2,CONSTANT),
+    /*18*/ 23,
+    /*19*/ INST_3(MOV_VALUE,2,CONSTANT,ACC_STACK),
+    /*20*/ 1,
+    /*21*/ INST_2(DEC_VALUE,1,SP),
+    /*22*/ INST_1(RET_VALUE),
+
+    /*23*/ INST_3(SUB_VALUE,2,ADDR_SP,CONSTANT), //CASE 2
+    /*24*/ 2,
+    /*25*/ INST_2(JSR_VALUE,2,CONSTANT),
+    /*26*/ 5,
+    /*27*/ INST_3(SUB_VALUE,2,ADDR_SP,CONSTANT),
+    /*28*/ 1,
+    /*29*/ INST_2(JSR_VALUE,2,CONSTANT),
+    /*30*/ 5,
+    /*31*/ INST_3(ADD_VALUE,1,ACC_STACK, ACC_STACK),
+    /*32*/ INST_2(DEC_VALUE,1,SP),
+    /*33*/ INST_1(RET_VALUE)
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*35);
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,5000),0);
+    printf("Stack has %lu\n",peep(fml->s));
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+  destroy_machine(fml);
+}
+

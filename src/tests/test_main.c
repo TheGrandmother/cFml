@@ -6,7 +6,6 @@
 #include "eval_test.h"
 
 
-#define OLD_CUNIT
 #ifdef OLD_CUNIT
 #define TEST_SUITE(NAME, SUITE_NAME) {NAME, init_suite, clean_suite, SUITE_NAME},
 #else
@@ -59,6 +58,8 @@ int main(){
      {"Testing MOV 420 x", test_mov_const_x},
      {"Testing MOV 420 $42", test_mov_const_mem},
      {"Testing MOV 420 s", test_mov_const_s},
+     {"Testing MOV sp x", test_mov_sp_x},
+     {"Testing MOV $sp x", test_mov_addr_sp_x},
      CU_TEST_INFO_NULL,
    };
 
@@ -70,14 +71,21 @@ int main(){
      CU_TEST_INFO_NULL,
    };
 
+   CU_TestInfo big_tests[] = {
+     {"Testing fib 10", test_fib},
+     CU_TEST_INFO_NULL,
+   };
+
    CU_SuiteInfo suites[] = {
      TEST_SUITE("Testing Stack", stack_tests)
      TEST_SUITE("Testing Ram"  , ram_tests)
      TEST_SUITE("Testing Special Instructions" , special_ops) 
      TEST_SUITE("Testing Bianry Operations" , binary_ops) 
      TEST_SUITE("Testing Control Instructioins" , control_ops) 
+     TEST_SUITE("Doing complicated tests" , big_tests) 
      CU_SUITE_INFO_NULL,
    };
+
 
    /* add a suite to the registry */
    CU_register_suites(suites);

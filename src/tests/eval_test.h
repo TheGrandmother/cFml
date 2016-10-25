@@ -21,6 +21,9 @@ void test_inc();
 void test_mov_const_x();
 void test_mov_const_mem();
 void test_mov_const_s();
+void test_mov_const_sp();
+void test_mov_sp_x();
+void test_mov_addr_sp_x();
 void test_add_c_c();
 void test_eql_x_c();
 void test_div_420_0_fail();
@@ -33,5 +36,6 @@ void test_jmp();
 void test_jsr();
 void test_nested_jsr();
 void test_empty_jump_stack();
+void test_fib();
 
 #endif
