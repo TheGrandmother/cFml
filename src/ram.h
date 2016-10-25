@@ -43,4 +43,8 @@ fml_word read(fml_ram *ram, fml_addr addr);
  * @param data The data to be written.
  */
 void write(fml_ram *ram, fml_addr addr, fml_word data);
+
+
+
+void print_ram(fml_ram *ram, fml_addr start, fml_addr stop);
 #endif

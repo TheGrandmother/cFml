@@ -37,6 +37,9 @@ char *decode_arg(fml_ram *ram, fml_addr pc, fml_word a, fml_addr offs){
     case(CONSTANT):
       sprintf(val,"0x%lx",ram->prg_ram[pc+offs]);
       break;
+    case(SP):
+      sprintf(val,"sp");
+      break;
     default:
       fprintf(stderr,"Tried to decode strange arguemnt.\n");
       E4C_THROW(FmlException,NULL);

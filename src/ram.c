@@ -13,6 +13,9 @@
 #include "irq_page.h"
 #include "e4c/e4c_lite.h"
 
+#include <stdio.h>
+#include <string.h>
+
 E4C_DEFINE_EXCEPTION(RamException, "Stack Exception.", RuntimeException);
 E4C_DEFINE_EXCEPTION(BadAddressException, "Stack empty.", RamException);
 E4C_DEFINE_EXCEPTION(SpecialPageException, "Exception in special page",RamException);
@@ -88,4 +91,19 @@ void write(fml_ram *ram, fml_addr addr, fml_word data){
         break;
     }
   }
+}
+
+
+void print_ram(fml_ram *ram, fml_addr start, fml_addr stop){
+
+  stop = (stop >= ram->ram_size) ? ram->ram_size - 1 : stop;
+
+  char *string = calloc(1024, sizeof(char));
+  for(fml_addr i = start;  i < stop; i++){
+    char *tmp = calloc(256, sizeof(char));
+    sprintf(tmp, "%lx : %lx(%lu)\n", i, ram->ram[i], ram->ram[i]);
+    strcat(string,tmp);
+  }
+  printf("%s",string);
+
 }

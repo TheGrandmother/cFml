@@ -42,6 +42,9 @@ fml_word read_argument(fml_word arg, fml_machine *self, fml_addr offs){
     case ACC_STACK:
       val = pop(self->s);
       break;
+    case SP:
+      val = self->sp;
+      break;
     default:
       fprintf(stderr,"Undefined argument location !?");
       E4C_THROW(FmlException,NULL);
@@ -77,6 +80,9 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
       case ACC_STACK:
         push(self->s,val);
         break;
+      case SP:
+        self->sp = val;
+        break;
       default:
         fprintf(stderr,"Undefined argument location !?\n");
         E4C_THROW(FmlException,NULL);
@@ -85,7 +91,7 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
   }
 }
 
-extern inline void eval_control(fml_machine *self, fml_word op_index, fml_word instruction, fml_addr step_length, fml_addr a1_offs){
+extern inline void eval_control(fml_machine *self, fml_word op_index, fml_word instruction, fml_addr step_length, fml_addr a1_offs, uint64_t steps){
   switch(op_index){
     fml_word a0;
     case(JMP_VALUE):
@@ -146,6 +152,7 @@ exec_jsr:
 
     case(HLT_VALUE):
       self->halt = 1;
+      printf("Halting VM after %lu steps\n",steps);
       break;
 
     case(DIE_VALUE):
@@ -186,11 +193,18 @@ int eval(fml_machine *self, uint64_t max_steps){
   puts("Entered eval function");
   uint64_t steps = 0;
   while(!self->halt){
-    puts("");
-    printf("Evaluating at 0x%lx\n",self->pc);
 
     fml_word instruction = self->ram->prg_ram[self->pc];
+
+#define DEBUG_FULL
+#ifdef DEBUG_FULL
+    puts("");
+    printf("Evaluating at 0x%lx\n",self->pc);
     print_prog(self->ram, self->pc);
+    print_ram(self->ram, 0, 10);
+    print_stack(self->s);
+    print_stack(self->js);
+#endif
 
     fml_addr step_length = (instruction & STEP_MASK) >> STEP_SHIFT;
 
@@ -226,7 +240,7 @@ int eval(fml_machine *self, uint64_t max_steps){
 
       }else{
         //Control operations. 
-        eval_control(self, op_index, instruction, step_length, a1_offs);
+        eval_control(self, op_index, instruction, step_length, a1_offs, steps);
       }
     }else{
       self->pc++;
