@@ -10,25 +10,26 @@
 #define _ISA_CONSTANTS_H
 
 //The following constnts concern the instruction layout
-#define STEP_MASK 	0x0000000000000700ULL
-#define A0_MASK 	0x000000000000000fULL
-#define A1_MASK 	0x00000000000000f0ULL
-#define OPCODE_MASK 	0xfffffffffffff800ULL
-#define A1_SHIFT 	0x4ULL
-#define STEP_SHIFT 	0x8ULL
+#define STEP_MASK 	0x0000000000000e00ULL
+#define A0_MASK 	0x000000000000001fULL
+#define A1_MASK 	0x00000000000001e0ULL
+#define OPCODE_MASK 	0xfffffffffffff000ULL
+#define A1_SHIFT 	0x5ULL
+#define STEP_SHIFT 	0x9ULL
 #define A0_SHIFT 	0x0ULL
-#define OPCODE_SHIFT 	0xbULL
+#define OPCODE_SHIFT 	0xcULL
 #define A0_OFFS	0x1ULL
 #define A1_OFFS	0x2ULL
 
 
 //These constants define the strucuture of the argument
-#define SP_MASK 	0x0000000000000008ULL
-#define LOCATION_MASK 	0x0000000000000003ULL
-#define ADDRESS_MASK 	0x0000000000000004ULL
+#define SP_MASK 	0x0000000000000010ULL
+#define LOCATION_MASK 	0x0000000000000007ULL
+#define ADDRESS_MASK 	0x0000000000000008ULL
 #define REG_X 	0x0ULL
 #define REG_Y 	0x1ULL
 #define CONSTANT 	0x3ULL
+#define SP 	0x4ULL
 #define ACC_STACK 	0x2ULL
 
 
