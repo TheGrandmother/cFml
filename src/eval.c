@@ -28,7 +28,7 @@ E4C_DEFINE_EXCEPTION(InvalidOperationException, "Invalid Operation", Instruction
 extern inline fml_word eval_binop(fml_word, fml_word, fml_word);
 
 fml_word read_argument(fml_word arg, fml_machine *self, fml_addr offs){
-  fml_word val = 0;
+  fml_word val;
   switch(arg & LOCATION_MASK){
     case REG_X:
       val = self->x;
@@ -36,11 +36,11 @@ fml_word read_argument(fml_word arg, fml_machine *self, fml_addr offs){
     case REG_Y:
       val = self->y;
       break;
-    case CONSTANT:
-      val = self->ram->prg_ram[self->pc + offs];
-      break;
     case ACC_STACK:
       val = pop(self->s);
+      break;
+    case CONSTANT:
+      val = self->ram->prg_ram[self->pc + offs];
       break;
     case SP:
       val = self->sp;
@@ -54,14 +54,13 @@ fml_word read_argument(fml_word arg, fml_machine *self, fml_addr offs){
   if((arg & ADDRESS_MASK) != 0){
     val += (arg & SP_MASK) != 0 ? self->sp : 0;  
     return read(self->ram,val);
-  }else{
-    return val;
   }
+  return val;
+  
 }
 
 void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val){
   if((arg & ADDRESS_MASK) != 0){
-    //We get the address as we should have gotten a normal argument.
     fml_addr addr = read_argument(arg & LOCATION_MASK, self, offs);
     addr += (arg & SP_MASK) != 0 ? self->sp : 0;  
     write(self->ram,addr,val);
@@ -73,12 +72,12 @@ void write_argument(fml_word arg, fml_machine *self, fml_addr offs, fml_word val
       case REG_Y:
         self->y = val;
         break;
+      case ACC_STACK:
+        push(self->s,val);
+        break;
       case CONSTANT:
         fprintf(stderr,"Attempting to write to constant.\n");
         E4C_THROW(MoveToConstantException, NULL);
-        break;
-      case ACC_STACK:
-        push(self->s,val);
         break;
       case SP:
         self->sp = val;
@@ -101,20 +100,12 @@ extern inline void eval_control(fml_machine *self, fml_word op_index, fml_word i
 
     case(JOO_VALUE):
       a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
-      if(pop(self->s) == 1){
-        self->pc = a0;
-      }else{
-        self->pc += step_length;
-      }
+      self->pc = (pop(self->s) == 1) ? a0 : self->pc + step_length;
       break;
 
     case(JOZ_VALUE):
       a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
-      if(pop(self->s) == 0){
-        self->pc = a0;
-      }else{
-        self->pc += step_length;
-      }
+      self->pc = (pop(self->s) == 0) ? a0 : self->pc + step_length;
       break;
 
     case(SOO_VALUE):
@@ -169,8 +160,7 @@ exec_jsr:
 }
 
 extern inline void eval_special(fml_machine *self, fml_word op_index, fml_word instruction, fml_addr step_length, fml_addr a1_offs){
-  fml_word val = 0;
-  val = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+  fml_word val = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
 
   switch(op_index){
     case(INC_VALUE):
@@ -196,7 +186,7 @@ int eval(fml_machine *self, uint64_t max_steps){
 
     fml_word instruction = self->ram->prg_ram[self->pc];
 
-#define DEBUG_FULL
+//#define DEBUG_FULL
 #ifdef DEBUG_FULL
     puts("");
     printf("Evaluating at 0x%lx\n",self->pc);
@@ -211,12 +201,6 @@ int eval(fml_machine *self, uint64_t max_steps){
     if(instruction != NOP){
       fml_word op_index = (instruction & OPCODE_MASK) >> OPCODE_SHIFT;
 
-      if(op_index >= OPERATIONS_END){
-        fprintf(stderr,"Operation out of bounds: %lu(%lX)\n",op_index,op_index);
-        E4C_THROW(InvalidOperationException,NULL);
-        return 1;
-      }
-      
       //Compute offs
       fml_addr a1_offs = A0_OFFS + 
         ((((instruction & A0_MASK) >> A0_SHIFT) & LOCATION_MASK) == CONSTANT  ? 1 : 0);
@@ -238,13 +222,18 @@ int eval(fml_machine *self, uint64_t max_steps){
 
         self->pc += step_length;
 
-      }else{
+      }else if(op_index < OPERATIONS_END){
         //Control operations. 
         eval_control(self, op_index, instruction, step_length, a1_offs, steps);
+      }else{
+          fprintf(stderr,"Operation out of bounds: %lu(%lX)\n",op_index,op_index);
+          E4C_THROW(InvalidOperationException,NULL);
+          return 1;
       }
     }else{
       self->pc++;
     }
+
     if(steps != max_steps){
       steps++;
     }else{
