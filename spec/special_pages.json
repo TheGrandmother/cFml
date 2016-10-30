@@ -1,0 +1,94 @@
+{
+  "layout" : {
+    "page_select_bits" : [61,64]
+  },
+  "pages" : {
+    "lol_page" : {
+      "derp" : {
+        "name" : "derp"
+      }
+    },
+
+    "io_page" : {
+      "println" : {
+        "name" : "println",
+        "description" : "prints a nullterminated string to stdout and appends a newline.",
+        "args": {
+          "str" : "The address of a nullterminated string."
+        },
+        "returns" : "Nothing.",
+        "side_effects" : "None."
+      },
+
+      "print" : {
+        "name" : "print",
+        "description" : "prints a nullterminated string to stdout.",
+        "args": {
+          "str" : "The address of a nullterminated string."
+        },
+        "returns" : "Nothing.",
+        "side_effects" : "None."
+      },
+
+      "print_int" : {
+        "name" : "print_int",
+        "description" : "Prints a signed integer",
+        "args" : {
+          "i" : "The integer to be printed."
+        },
+        "returns" : "Nothing.",
+        "side_effects" : "None."
+      },
+
+      "print_uint" : {
+        "name" : "print_uint",
+        "description" : "Prints an unsigned integer",
+        "args" : {
+          "i" : "The integer to be printed."
+        },
+        "returns" : "Nothing.",
+        "side_effects" : "None."
+      },
+
+      "print_hex" : {
+        "name" : "print_hex",
+        "description" : "Prints an unsigned hex word",
+        "args" : {
+          "w" : "The word to be printed."
+        },
+        "returns" : "Nothing.",
+        "side_effects" : "None."
+      },
+
+      "print_float" : {
+        "name" : "print_float",
+        "description" : "Prints a floating point value",
+        "args" : {
+          "f" : "The floating point value."
+        },
+        "returns" : "Nothing.",
+        "side_effects" : "None."
+      },
+      
+      "get_car" : {
+        "name" : "get_char",
+        "description" : "Reads a single character from input. Will block until input is avaliable.",
+        "args" : {
+        },
+        "returns" : "The character to be read.",
+        "side_effects" : "None."
+      },
+
+      "read_string" : {
+        "name" : "read_string",
+        "description" : "Reads an entire string from input and copies it to the desired location.",
+        "args" : {
+          "location" : "The location in which the string is to be stored",
+          "buf_size" : "The size of the buffer to which the string is to be copied"
+        },
+        "returns" : "Nothing.",
+        "side_effects" : "Writes the string into the upplied memory location."
+      }
+    }
+  }
+}
