@@ -1,4 +1,4 @@
-C_FLAGS = -Wall -std=c11 -ggdb -Wno-dangling-else -Werror -D_POSIX_C_SOURCE=200809L
+C_FLAGS = -Wall -std=c11 -ggdb -Wno-dangling-else -Werror -D_POSIX_C_SOURCE=200809L -O2
 COMPILER = clang
 
 test: e4c_lite.o eval_test.o stack_test.o stack.o ram.o ram_test.o tests/test_main.c fml_machine.o eval.o debug.o
