@@ -6,7 +6,7 @@ test: FORCE
 	make -C src test
 	./bin/test
 
-constants: src/constants/operation_constants.h src/constants/isa_constants.h spec/generate_specs.py src/constants/binop_eval.h src/constants/reverse_lookup.h
+constants: src/constants/operation_constants.h src/constants/isa_constants.h spec/generate_specs.py src/constants/binop_eval.h src/constants/reverse_lookup.h src/constants/reverse_lookup.h src/constants/memmory_constants.h
 
 src/constants/operation_constants.h: spec/instructions.json spec/ISA.json spec/generate_specs.py
 	cd spec/; python generate_specs.py -o -w
@@ -23,6 +23,14 @@ src/constants/binop_eval.h: spec/instructions.json spec/generate_specs.py
 src/constants/reverse_lookup.h: spec/instructions.json spec/generate_specs.py
 	cd spec/; python generate_specs.py -rl -w
 	mv spec/reverse_lookup.h $@
+
+src/constants/memmory_pages.h: spec/special_pages.json spec/generate_specs.py
+	cd spec/; python generate_specs.py -pf -w
+	mv spec/memmory_pages.h $@
+
+src/constants/memmory_constants.h: spec/special_pages.json spec/generate_specs.py
+	cd spec/; python generate_specs.py -mc -w
+	mv spec/memmory_constants.h $@
 
 FORCE:
 

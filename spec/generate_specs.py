@@ -85,12 +85,22 @@ class MemmoryPages():
 
     def makeConstantFile(self):
         comment = "This is merly a thing"
-        print generateHeaderFile("mem_constants",comment,"", self.mem_constants) 
+        return generateHeaderFile("mem_constants",comment,"", self.mem_constants) 
 
     def makePageFiles(self):
         for page_name, values in self.page_files.iteritems():
             comment = "Constants for " + page_name
-            print generateHeaderFile(page_name + "_constants",comment, "", values)
+            return generateHeaderFile(page_name + "_constants",comment, "", values)
+
+    def writeMemmoryPages(self):
+        header_file = open("memmory_pages.h",'w')
+        header_file.write(self.makePageFiles())
+        header_file.close()
+
+    def writeMemmoryConstants(self):
+        header_file = open("memmory_constants.h",'w')
+        header_file.write(self.makeConstantFile())
+        header_file.close()
 
     
 class OperationsLayout():
@@ -386,10 +396,6 @@ class InstructionLayout():
         header_file.close()
 
 if __name__ == "__main__":
-    mem_pages = MemmoryPages("special_pages.json")
-    mem_pages.makeConstantFile()
-    mem_pages.makePageFiles()
-    quit()
 
     print_files = False
     write_files = False
@@ -397,6 +403,8 @@ if __name__ == "__main__":
     make_operations = False
     make_code = False
     make_lookup = False
+    make_pages = False
+    make_mem_constants = False
     for arg in sys.argv:
         if arg == "-i":
             make_instructions = True;
@@ -408,7 +416,13 @@ if __name__ == "__main__":
             make_code = True;
             continue
         elif arg == "-rl":
-            make_lookup = True;
+            make_lookup = True
+            continue
+        elif arg == "-pf":
+            make_pages = True
+            continue
+        elif arg == "-mc":
+            make_mem_constants = True
             continue
         elif arg == "-p":
             print_files = True
@@ -449,3 +463,16 @@ if __name__ == "__main__":
         if write_files:
             operations.writeReverseLookupFile()
 
+    if make_pages:
+        mem_pages = MemmoryPages("special_pages.json")
+        if print_files:
+            print mem_pages.makePageFiles()
+        if write_files:
+            mem_pages.writeMemmoryPages()
+
+    if make_mem_constants:
+        mem_pages = MemmoryPages("special_pages.json")
+        if print_files:
+            print mem_pages.makeConstantFile()
+        if write_files:
+            mem_pages.writeMemmoryConstants()
