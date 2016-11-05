@@ -151,6 +151,11 @@ exec_jsr:
       self->halt = 1;
       break;
 
+    case(EFC_VALUE):
+      E4C_THROW(SuicideException,NULL);
+      self->halt = 1;
+      break;
+
     default:
       fprintf(stderr,"Not implemented");
       E4C_THROW(NotImplementedException,NULL);

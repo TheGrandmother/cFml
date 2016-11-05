@@ -4,13 +4,11 @@
  * TODO: Do some sane way of handling the DMA pages.
  **/
 #include "components.h"
-#include "constants.h"
+#include "constants/memmory_constants.h"
+#include "constants/pages/io_page_constants.h"
 #include "types.h"
 #include "fail.h"
-#include "video_page.h"
-#include "hardware_page.h"
-#include "video_page.h"
-#include "irq_page.h"
+#include "pages/io_page.h"
 #include "e4c/e4c_lite.h"
 
 #include <stdio.h>
@@ -52,14 +50,9 @@ fml_word read(fml_ram *ram, fml_addr addr){
     return ram->ram[addr];
   }else{
     switch (addr & PAGE_MASK){
-      case VIDEO_PAGE_VALUE:
+      case IO_PAGE_INDEX:
+        return io_page_read(addr);
         E4C_THROW(VideoPageException, "Video page not implemented");
-        break;
-      case HARDWARE_PAGE_VALUE:
-        E4C_THROW(HardwarePageException, "Hardware page not implemented");
-        break;
-      case IRQ_PAGE_VALUE:
-        E4C_THROW(IrqPageException, "IRQ page not implemented");
         break;
       default:
         E4C_THROW(SpecialPageException,"Invalid Special Page");
@@ -77,14 +70,8 @@ void write(fml_ram *ram, fml_addr addr, fml_word data){
     ram->ram[addr] = data;
   }else{
     switch (addr & PAGE_MASK){
-      case VIDEO_PAGE_VALUE:
-        E4C_THROW(VideoPageException, "Video page not implemented");
-        break;
-      case HARDWARE_PAGE_VALUE:
-        E4C_THROW(HardwarePageException, "Hardware page not implemented");
-        break;
-      case IRQ_PAGE_VALUE:
-        E4C_THROW(IrqPageException, "IRQ page not implemented");
+      case IO_PAGE_INDEX:
+        io_page_write(addr, data);
         break;
       default:
         E4C_THROW(SpecialPageException,"Invalid Special Page");
@@ -95,7 +82,6 @@ void write(fml_ram *ram, fml_addr addr, fml_word data){
 
 
 void print_ram(fml_ram *ram, fml_addr start, fml_addr stop){
-
   stop = (stop >= ram->ram_size) ? ram->ram_size - 1 : stop;
 
   char *string = calloc(1024, sizeof(char));

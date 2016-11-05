@@ -171,6 +171,12 @@
       "description" : "Halts the VM",
       "mnemonic" : "HLT",
       "args" : 0
+    },
+    "EFC" : {
+      "name" : "External function call",
+      "description" : "Calls a special function from a page",
+      "mnemonic" : "EFC",
+      "args" : 1
     }
   }
 }
