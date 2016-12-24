@@ -6,6 +6,10 @@ test: FORCE
 	make -C src test
 	./bin/test
 
+test_pages: FORCE
+	make -C src test_pages
+	./bin/page_test
+
 constants: src/constants/operation_constants.h src/constants/isa_constants.h spec/generate_specs.py src/constants/binop_eval.h src/constants/reverse_lookup.h  src/constants/memmory_constants.h  page_constants
 
 src/constants/operation_constants.h: spec/instructions.json spec/ISA.json spec/generate_specs.py
