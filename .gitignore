@@ -8,3 +8,5 @@ bin/
 #vim files
 *.swp
 *.swo
+*.swm
+*.swn
