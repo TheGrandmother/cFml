@@ -4,7 +4,7 @@ COMPILER = clang
 test_pages: e4c_lite.o stack.o ram.o tests/test_pages.c fml_machine.o eval.o debug.o io_tests.o io_page.o pages.o
 	$(COMPILER) $(C_FLAGS)  -L/usr/local/lib  $^ -o ../bin/page_test -lcunit
 
-test: e4c_lite.o eval_test.o stack_test.o stack.o ram.o ram_test.o tests/test_main.c fml_machine.o eval.o debug.o
+test: e4c_lite.o eval_test.o stack_test.o stack.o ram.o ram_test.o tests/test_main.c fml_machine.o eval.o debug.o pages.o io_page.o
 	$(COMPILER) $(C_FLAGS)  -L/usr/local/lib  $^ -o ../bin/test -lcunit
 
 io_tests.o: tests/io_tests.c 

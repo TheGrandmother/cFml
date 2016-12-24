@@ -23,9 +23,11 @@ int main(){
    /* initialize the CUnit test registry */
    if ( CUE_SUCCESS != CU_initialize_registry() )
       return CU_get_error();
-    
+   
    CU_TestInfo output_tests[] = {
      {"Testing print line.", test_println},
+     {"Testing get and put.", test_get_char_put_char },
+     {"Testing get and put.",  test_read_line},
      CU_TEST_INFO_NULL,
    };
 

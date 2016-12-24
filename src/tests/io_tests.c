@@ -28,6 +28,59 @@ void redirect_test(){
 }
 
 
+void test_get_char_put_char(){
+  fml_machine *fml = create_machine(100,100,100,100);
+  fml_word program[100] ={
+    INST_2(EFC_VALUE, 2, CONSTANT), 
+    (IO_PAGE_INDEX << PAGE_SHIFT) | GET_CHAR,
+    INST_3(MOV_VALUE, 1, ACC_STACK, REG_X),
+    INST_3(EQL_VALUE, 2, REG_X, CONSTANT), 
+    '\n',
+    INST_2(JOO_VALUE, 2, CONSTANT), 
+    12,
+    INST_3(MOV_VALUE, 1, REG_X, ACC_STACK),
+    INST_2(EFC_VALUE, 2, CONSTANT), 
+    (IO_PAGE_INDEX << PAGE_SHIFT) | PUT_CHAR,
+    INST_2(JMP_VALUE, 2, CONSTANT), 
+    0,
+    INST_1(HLT_VALUE)
+
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*100);
+
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+  destroy_machine(fml);
+}
+
+void test_read_line(){
+  fml_machine *fml = create_machine(100,100,100,100);
+  fml_word program[100] ={
+    INST_3(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    70,
+    INST_3(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    10,
+    INST_2(EFC_VALUE, 2, CONSTANT), 
+    (IO_PAGE_INDEX << PAGE_SHIFT) | READ_LINE,
+    INST_3(MOV_VALUE, 2, CONSTANT, ACC_STACK),
+    70,
+    INST_2(EFC_VALUE, 2, CONSTANT), 
+    (IO_PAGE_INDEX << PAGE_SHIFT) | PRINTLN,
+    INST_1(HLT_VALUE)
+
+  };
+  memcpy(fml->ram->prg_ram,program,sizeof(fml_word)*100);
+
+  E4C_TRY{
+    CU_ASSERT_EQUAL(eval(fml,1000),0);
+  }E4C_CATCH(SuicideException){
+    CU_FAIL("Program threw Suicide :'(\n");
+  }
+  destroy_machine(fml);
+}
 
 void test_println(){
   fml_machine *fml = create_machine(100,50,100,100);

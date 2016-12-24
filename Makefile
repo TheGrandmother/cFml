@@ -30,7 +30,7 @@ src/constants/reverse_lookup.h: spec/instructions.json spec/generate_specs.py
 
 page_constants: spec/special_pages.json spec/generate_specs.py
 	cd spec/; python generate_specs.py -pf -w
-	cp -r spec/pages/ src/constants/pages/
+	cp -r spec/pages/* src/constants/pages/
 
 src/constants/memmory_constants.h: spec/special_pages.json spec/generate_specs.py
 	cd spec/; python generate_specs.py -mc -w

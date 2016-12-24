@@ -70,7 +70,17 @@
         "side_effects" : "None."
       },
       
-      "get_car" : {
+      "put_char" : {
+        "name" : "put_char",
+        "description" : "Prints a char to stdout",
+        "args" : {
+          "c" : "The char"
+        },
+        "returns" : "Nothing.",
+        "side_effects" : "None."
+      },
+      
+      "get_char" : {
         "name" : "get_char",
         "description" : "Reads a single character from input. Will block until input is avaliable.",
         "args" : {
@@ -79,12 +89,21 @@
         "side_effects" : "None."
       },
 
-      "read_string" : {
-        "name" : "read_string",
-        "description" : "Reads an entire string from input and copies it to the desired location.",
+      "flush_in" : {
+        "name" : "flush_in",
+        "description" : "Flushes stdin",
         "args" : {
-          "location" : "The location in which the string is to be stored",
-          "buf_size" : "The size of the buffer to which the string is to be copied"
+        },
+        "returns" : "Node",
+        "side_effects" : "Flushes the entire fucking input buffer :O"
+      },
+
+      "read_line" : {
+        "name" : "read_line",
+        "description" : "Reads a line from stdin and stores it in the given location. Will not read more than buf_size chracters.",
+        "args" : {
+          "location" : "The location in which the string is to be stored.",
+          "buf_size" : "The size of the buffer to which the string is to be copied."
         },
         "returns" : "Nothing.",
         "side_effects" : "Writes the string into the upplied memory location."
