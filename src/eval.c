@@ -7,6 +7,7 @@
 #include "stack.h"
 #include "ram.h"
 #include "debug.h"
+#include "pages.h"
 
 
 #include <stdio.h>
@@ -152,8 +153,9 @@ exec_jsr:
       break;
 
     case(EFC_VALUE):
-      E4C_THROW(SuicideException,NULL);
-      self->halt = 1;
+      a0 = read_argument((instruction & A0_MASK) >> A0_SHIFT, self, A0_OFFS);
+      external_function_call(self, a0);
+      self->pc += step_length;
       break;
 
     default:
