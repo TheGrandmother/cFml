@@ -96,8 +96,7 @@ inline char *mne_lookup(fml_word op_index){
 		 return "JOO";
 
 	}
-
-return NULL;
+  return "???";
 }
 inline fml_addr arg_lookup(fml_word op_index){
 	switch(op_index){
